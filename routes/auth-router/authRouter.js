@@ -23,7 +23,7 @@
  *           type: array
  *           items:
  *             type: string
- *             enum: [email, google, github, discord]
+ *             enum: [email, google, github, discord, wallet]
  *           description: Authentication methods linked to the account
  *         passwordHash:
  *           type: string

@@ -1,5 +1,8 @@
 import "dotenv/config";
 import mongoose from "mongoose";
+import { GridFSBucket } from "mongodb";
+
+export let bucket;
 
 export async function connectToMongoDB() {
 	try {
@@ -10,6 +13,13 @@ export async function connectToMongoDB() {
 		}
 
 		await mongoose.connect(process.env.DB_URI);
+
+		if (!bucket) {
+			bucket = new GridFSBucket(mongoose.connection.db, {
+				bucketName: "avatars",
+			});
+		}
+
 		console.log("✅ Connected to MongoDB");
 	} catch (err) {
 		console.error("❌ MongoDB connection error:", err);

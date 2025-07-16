@@ -16,14 +16,19 @@ const userSchema = new mongoose.Schema({
 	name: {
 		type: String,
 		required: true,
+		trim: true,
+	},
+	password: {
+		type: String,
+		default: null,
+	},
+	avatar: {
+		type: mongoose.Schema.Types.ObjectId,
+		default: null,
 	},
 	authProviders: {
 		type: [String],
-		enum: ["email", "google", "github", "discord"],
-	},
-	passwordHash: {
-		type: String,
-		default: null,
+		enum: ["email", "google", "github", "discord", "wallet"],
 	},
 	googleId: {
 		type: String,
@@ -37,9 +42,13 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		default: null,
 	},
+	walletId: {
+		type: String,
+		default: null,
+	},
 	rpcCredits: {
 		type: Number,
-		default: 100000,
+		default: 100_000,
 	},
 	projects: [
 		{
