@@ -6,29 +6,34 @@
  *       type: object
  *       required:
  *         - accountId
- *         - name
  *         - email
+ *         - name
  *       properties:
  *         accountId:
  *           type: string
  *           description: Unique account ID (UUID)
- *         name:
- *           type: string
- *           description: User's name
  *         email:
  *           type: string
  *           format: email
  *           description: User's email address
+ *         name:
+ *           type: string
+ *           description: User's name
+ *         password:
+ *           type: string
+ *           nullable: true
+ *           description: Hashed password, null if using OAuth
+ *         avatar:
+ *           type: string
+ *           format: uuid
+ *           nullable: true
+ *           description: GridFS file ID of avatar image
  *         authProviders:
  *           type: array
  *           items:
  *             type: string
  *             enum: [email, google, github, discord, wallet]
  *           description: Authentication methods linked to the account
- *         passwordHash:
- *           type: string
- *           nullable: true
- *           description: Hashed password, null if using OAuth
  *         googleId:
  *           type: string
  *           nullable: true
@@ -45,7 +50,7 @@
  *         projects:
  *           type: array
  *           items:
- *             $ref: '#/components/schemas/Project'  # Define Project schema separately
+ *             $ref: '#/components/schemas/Project'
  *           description: List of user projects (max 3)
  *         createdAt:
  *           type: string
@@ -54,12 +59,14 @@
  *       example:
  *         accountId: 123e4567-e89b-12d3-a456-426614174000
  *         email: user@example.com
+ *         name: Joh Doe
+ *         avatar: 66a5f1aaf3182e001f7f1234
  *         authProviders: [email, google]
  *         passwordHash: $2b$10$somethinghashed
  *         googleId: "google-oauth-id"
  *         githubId: null
  *         discordId: null
- *         rpcCredits: 100000
+ *         rpcCredits: 100_000
  *         projects: []
  *         createdAt: 2025-07-16T15:00:00.000Z
  */
@@ -109,9 +116,9 @@
 
 /**
  * @swagger
- * /auth/login:
+ * /auth/check-email:
  *   post:
- *     summary: Login with Email
+ *     summary: Checks if email exist and send a response to request for password for authentication
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -151,16 +158,12 @@
  */
 
 import { Router } from "express";
-import { body } from "express-validator";
-import { getEmail } from "../../controllers/auth-controller/authController.js";
+import { checkEmail } from "../../controllers/auth-controller/authController.js";
+import { validateEmail } from "../../utils/validations.js";
 
 const authRouter = Router();
 
-authRouter.post(
-	"/login",
-	body("email").isEmail().withMessage("Valid email required"),
-	getEmail
-);
+authRouter.post("/check-email", validateEmail, checkEmail);
 
 authRouter.post("/google", (req, res) => {
 	res.json(`Login with google`);

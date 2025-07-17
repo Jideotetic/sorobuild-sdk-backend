@@ -1,6 +1,6 @@
 import express from "express";
 import swaggerUi from "swagger-ui-express";
-import specs from "./swagger.js";
+import { specs } from "./swagger.js";
 import authRouter from "./routes/auth-router/authRouter.js";
 import { connectToMongoDB } from "./model/db.js";
 
@@ -24,6 +24,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRouter);
+
+app.use((err, req, res, next) => {
+	console.error(err);
+	res.status(err.statusCode || 500).json({
+		statusCode: err.statusCode || 500,
+		name: err.name || "InternalServerError",
+		message: JSON.parse(err.message) || "Something went wrong",
+	});
+});
 
 app.listen(port, () => {
 	console.log(`Example app listening on port ${port}`);
