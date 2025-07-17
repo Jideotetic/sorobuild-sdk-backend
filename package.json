@@ -11,10 +11,14 @@
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
+		"bcryptjs": "^3.0.2",
+		"cors": "^2.8.5",
 		"dotenv": "^17.2.0",
 		"express": "^5.1.0",
 		"express-validator": "^7.2.1",
 		"mongoose": "^8.16.4",
+		"passport": "^0.7.0",
+		"passport-local": "^1.0.0",
 		"swagger-jsdoc": "^6.2.8",
 		"swagger-ui-express": "^5.0.1",
 		"uuid": "^11.1.0"

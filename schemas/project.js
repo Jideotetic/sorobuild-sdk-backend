@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 
 const projectSchema = new mongoose.Schema({
 	projectId: {
 		type: String,
 		required: true,
 		unique: true,
+		default: () => uuidv4(),
 	},
 	name: {
 		type: String,
@@ -12,7 +14,6 @@ const projectSchema = new mongoose.Schema({
 	},
 	whitelistedDomain: {
 		type: String,
-		required: true,
 	},
 	devMode: {
 		type: Boolean,
