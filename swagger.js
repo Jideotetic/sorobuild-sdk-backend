@@ -10,7 +10,7 @@ const options = {
 		},
 		servers: [
 			{
-				url: `http://localhost:${process.env.PORT || 3000}`,
+				url: `http://localhost:${process.env.PORT || 3000}/api`,
 			},
 		],
 	},
@@ -19,4 +19,4 @@ const options = {
 
 const specs = swaggerJsdoc(options);
 
-export default specs;
+export { specs };
