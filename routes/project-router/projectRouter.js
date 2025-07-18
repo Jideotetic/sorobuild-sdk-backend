@@ -67,19 +67,9 @@
  *         schema:
  *           type: string
  *         description: The unique ID (_id) of the account to which the project belongs
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 example: "Default Project"
  *     responses:
- *       201:
- *         description: Project created successfully
+ *       200:
+ *         description: Project fetched successfully
  *         content:
  *           application/json:
  *             schema:

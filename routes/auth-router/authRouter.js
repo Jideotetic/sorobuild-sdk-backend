@@ -213,7 +213,6 @@
  *                     $ref: '#/components/schemas/User'
  *                 token:
  *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjY4N2EwM2M5Mzk5NzY0ZjMzMTM3MGY5NiIsImVtYWlsIjoiamlkZW90ZXRpY0BnbWFpbC5jb20ifSwiaWF0IjoxNzUyODI2ODI1LCJleHAiOjE3NTI5MTMyMjV9.d0f2-QQLd6f2F0vLcAA4CxVjjSNlsgMOzk37-AV5KwE
  *       400:
  *         description: Bad Request
  *       500:
@@ -262,7 +261,6 @@
  *                     $ref: '#/components/schemas/User'
  *                 token:
  *                   type: string
- *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjY4N2EwM2M5Mzk5NzY0ZjMzMTM3MGY5NiIsImVtYWlsIjoiamlkZW90ZXRpY0BnbWFpbC5jb20ifSwiaWF0IjoxNzUyODI2ODI1LCJleHAiOjE3NTI5MTMyMjV9.d0f2-QQLd6f2F0vLcAA4CxVjjSNlsgMOzk37-AV5KwE
  *       400:
  *         description: Bad Request
  *       500:
