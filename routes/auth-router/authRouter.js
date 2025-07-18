@@ -5,32 +5,22 @@
  *     User:
  *       type: object
  *       required:
- *         - accountId
  *         - email
  *         - name
  *       properties:
  *         _id:
- *         type: string
- *         description: Unique ID
- *         accountId:
- *           type: string
- *           description: Unique account ID
+ *          type: string
+ *          description: Unique account ID
  *         email:
  *           type: string
- *           format: email
  *           description: User's email address
  *         name:
  *           type: string
  *           description: User's name
- *         password:
- *           type: string
- *           nullable: true
- *           description: Hashed password, null if using OAuth
  *         avatar:
  *           type: string
- *           format: uuid
  *           nullable: true
- *           description: GridFS file link of avatar image
+ *           description: File ID of avatar image
  *         authProviders:
  *           type: array
  *           items:
@@ -51,11 +41,7 @@
  *           nullable: true
  *         rpcCredits:
  *           type: number
- *           description: Available RPC credits
- *         whitelistedDomain:
- *           type: string
- *           format: hostname
- *           description: Domain allowed to use this project
+ *           description: Available RPC credits for account
  *         projects:
  *           type: array
  *           items:
@@ -63,14 +49,12 @@
  *           description: List of user projects (max 3)
  *         createdAt:
  *           type: string
- *           format: date-time
  *           description: Account creation timestamp
  *       example:
  *         _id: 687a03c9399764f331370f96
- *         accountId: 123e4567-e89b-12d3-a456-426614174000
  *         email: user@example.com
  *         name: Joh Doe
- *         avatar: "https://api/userId/avatar"
+ *         avatar: 687a03c9399764f331370f96
  *         authProviders: [email]
  *         googleId: null
  *         githubId: null
@@ -79,8 +63,9 @@
  *         rpcCredits: 100_000
  *         projects: [
  *           {
- *             projectId: 123e4567-e89b-12d3-a456-426614174000,
+ *             _id: 687a03c9399764f331370f96,
  *             name: Default Project,
+ *             whitelistedDomain: https://example.com,
  *             devMode: true,
  *             createdAt: 2025-07-16T12:00:00.000Z
  *            }
@@ -259,9 +244,6 @@ import {
 	signUpPayloadSchema,
 	signInPayloadSchema,
 } from "../../utils/validations.js";
-import OAuth2Client from "google-auth-library";
-import jwt from "jsonwebtoken";
-import passport from "passport";
 
 const authRouter = Router();
 

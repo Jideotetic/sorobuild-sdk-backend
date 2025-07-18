@@ -2,7 +2,6 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { User } from "../schemas/user.js";
 import { Project } from "../schemas/project.js";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as JWTstrategy, ExtractJwt } from "passport-jwt";
 
 passport.use(
@@ -36,6 +35,7 @@ passport.use(
 
 				const newProject = new Project({
 					owner: newUser._id,
+					whitelistedDomain: "",
 				});
 
 				await newProject.save();

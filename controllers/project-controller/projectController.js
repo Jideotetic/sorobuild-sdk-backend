@@ -13,7 +13,7 @@ export async function createProject(req, res, next) {
 			throw new CustomBadRequestError(JSON.stringify(errors.array()));
 		}
 
-		const { name } = req.body;
+		const { name, whitelistedDomain } = req.body;
 		const { accountId: _id } = req.params;
 
 		if (!_id) {
@@ -43,6 +43,7 @@ export async function createProject(req, res, next) {
 		const newProject = new Project({
 			owner: user._id,
 			name,
+			whitelistedDomain,
 		});
 
 		await newProject.save();
@@ -54,6 +55,7 @@ export async function createProject(req, res, next) {
 		res.status(201).json({
 			statusCode: 201,
 			message: "Project created successfully",
+			project: newProject,
 		});
 	} catch (error) {
 		console.error(error);
@@ -102,7 +104,7 @@ export async function updateProject(req, res, next) {
 			throw new CustomBadRequestError(JSON.stringify(errors.array()));
 		}
 
-		const { name, devMode } = req.body;
+		const { name, devMode, whitelistedDomain } = req.body;
 		const { accountId: _id, projectId } = req.params;
 
 		if (!_id || !projectId) {
@@ -151,6 +153,7 @@ export async function updateProject(req, res, next) {
 		res.status(200).json({
 			statusCode: 200,
 			message: "Project updated successfully",
+			project: updatedProject,
 		});
 	} catch (error) {
 		console.error(error);
@@ -214,5 +217,34 @@ export async function deleteProject(req, res, next) {
 	} catch (error) {
 		console.error(error);
 		return next(error);
+	}
+}
+
+export async function fetchAllProjects(req, res, next) {
+	try {
+		const start = parseInt(req.query.start) || 0;
+		const limit = parseInt(req.query.limit) || 10;
+
+		const projects = await Project.find()
+			.skip(start)
+			.limit(limit)
+			.sort({ createdAt: -1 });
+
+		const total = await Project.countDocuments();
+
+		res.status(200).json({
+			statusCode: 200,
+			message: "Projects fetched successfully",
+			projects,
+			pagination: {
+				start,
+				limit,
+				total,
+				hasNextPage: start + limit < total,
+			},
+		});
+	} catch (error) {
+		console.error(error);
+		next(error);
 	}
 }

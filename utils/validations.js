@@ -1,4 +1,5 @@
 import { body } from "express-validator";
+import validator from "validator";
 
 export const emailPayloadSchema = [
 	body("email")
@@ -90,6 +91,18 @@ export const signInPayloadSchema = [
 
 export const createProjectSchema = [
 	body("name").trim().notEmpty().withMessage("Name is required"),
+
+	body("whitelistedDomain")
+		.optional({ checkFalsy: true })
+		.trim()
+		.custom((value) => {
+			if (!validator.isURL(value, { require_protocol: true })) {
+				throw new Error(
+					"Must be a valid URL including protocol (http or https)"
+				);
+			}
+			return true;
+		}),
 ];
 
 export const updateProjectSchema = [
@@ -105,9 +118,21 @@ export const updateProjectSchema = [
 			return true;
 		}),
 
+	body("whitelistedDomain")
+		.optional({ checkFalsy: true })
+		.trim()
+		.custom((value) => {
+			if (!validator.isURL(value, { require_protocol: true })) {
+				throw new Error(
+					"Must be a valid URL including protocol (http or https)"
+				);
+			}
+
+			return true;
+		}),
+
 	body("devMode")
-		.exists({ checkNull: true })
-		.withMessage("devMode is required")
+		.optional()
 		.isBoolean()
 		.withMessage("devMode must be a boolean"),
 ];

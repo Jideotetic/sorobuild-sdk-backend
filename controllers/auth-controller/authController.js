@@ -97,11 +97,7 @@ export async function handleAuthCallback(
 
 		const JWT_SECRET = process.env.JWT_SECRET;
 
-		if (!JWT_SECRET) {
-			throw new Error("Missing JWT_SECRET in environment variables");
-		}
-
-		const body = { _id: user._id, email: user.email };
+		const body = { ...user };
 		const token = jwt.sign({ user: body }, JWT_SECRET, {
 			expiresIn: "24h",
 		});
@@ -121,6 +117,7 @@ export async function handleAuthCallback(
 
 export function passportAuthHandler(strategyName, statusCode) {
 	return (req, res, next) => {
+		// Calls the passport middleware for sign up /middlewares/passport.js
 		passport.authenticate(strategyName, (err, user, info) => {
 			handleAuthCallback(req, res, next, err, user, info, statusCode);
 		})(req, res, next);
