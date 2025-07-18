@@ -157,3 +157,62 @@ export async function updateProject(req, res, next) {
 		return next(error);
 	}
 }
+
+export async function deleteProject(req, res, next) {
+	try {
+		const { accountId: _id, projectId } = req.params;
+
+		if (!_id || !projectId) {
+			throw new CustomBadRequestError(
+				JSON.stringify("Account ID or Project ID missing")
+			);
+		}
+
+		if (!mongoose.Types.ObjectId.isValid(_id)) {
+			throw new CustomBadRequestError(
+				JSON.stringify("Invalid accountId format")
+			);
+		}
+
+		if (!mongoose.Types.ObjectId.isValid(projectId)) {
+			throw new CustomBadRequestError(
+				JSON.stringify("Invalid projectId format")
+			);
+		}
+
+		const user = await User.findOne({ _id });
+
+		if (!user) {
+			throw new CustomNotFoundError(
+				JSON.stringify("User not found with the provided account ID")
+			);
+		}
+
+		if (!user.projects.includes(projectId)) {
+			throw new CustomBadRequestError(
+				JSON.stringify("This project does not belong to the user")
+			);
+		}
+
+		const deletedProject = await Project.findOneAndDelete({
+			_id: projectId,
+			owner: user._id,
+		});
+
+		if (!deletedProject) {
+			throw new CustomNotFoundError("Project not found or already deleted");
+		}
+
+		user.projects = user.projects.filter((pId) => pId.toString() !== projectId);
+
+		await user.save();
+
+		res.status(200).json({
+			statusCode: 200,
+			message: "Project deleted successfully",
+		});
+	} catch (error) {
+		console.error(error);
+		return next(error);
+	}
+}

@@ -176,6 +176,49 @@
  *         description: Internal server error
  */
 
+/**
+ * @swagger
+ * /project/{accountId}/{projectId}:
+ *   delete:
+ *     summary: Delete a project
+ *     tags: [Project]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: accountId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique ID (_id) of the account to which the project belongs
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique ID of the project
+ *     responses:
+ *       200:
+ *         description: Project deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Project deleted successfully
+ *       401:
+ *         description: Unauthorized request
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+
 import { Router } from "express";
 import {
 	createProjectSchema,
@@ -183,6 +226,7 @@ import {
 } from "../../utils/validations.js";
 import {
 	createProject,
+	deleteProject,
 	fetchAllUserProjects,
 	updateProject,
 } from "../../controllers/project-controller/projectController.js";
@@ -194,5 +238,7 @@ projectRouter.post("/:accountId", createProjectSchema, createProject);
 projectRouter.get("/:accountId", fetchAllUserProjects);
 
 projectRouter.put("/:accountId/:projectId", updateProjectSchema, updateProject);
+
+projectRouter.delete("/:accountId/:projectId", deleteProject);
 
 export default projectRouter;
