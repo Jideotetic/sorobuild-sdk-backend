@@ -121,17 +121,78 @@
  *       500:
  *         description: Internal server error
  */
+
+/**
+ * @swagger
+ * /project/{accountId}/{projectId}:
+ *   put:
+ *     summary: Update a project
+ *     tags: [Project]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: accountId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique ID (_id) of the account to which the project belongs
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique ID of the project
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               devMode:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Project updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Project updated successfully
+ *       401:
+ *         description: Unauthorized request
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
+
 import { Router } from "express";
-import { createProjectSchema } from "../../utils/validations.js";
+import {
+	createProjectSchema,
+	updateProjectSchema,
+} from "../../utils/validations.js";
 import {
 	createProject,
 	fetchAllUserProjects,
-} from "../../controllers/project-contoller/projectController.js";
+	updateProject,
+} from "../../controllers/project-controller/projectController.js";
 
 const projectRouter = Router();
 
 projectRouter.post("/:accountId", createProjectSchema, createProject);
 
 projectRouter.get("/:accountId", fetchAllUserProjects);
+
+projectRouter.put("/:accountId/:projectId", updateProjectSchema, updateProject);
 
 export default projectRouter;

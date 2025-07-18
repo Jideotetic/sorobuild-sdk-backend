@@ -91,3 +91,23 @@ export const signInPayloadSchema = [
 export const createProjectSchema = [
 	body("name").trim().notEmpty().withMessage("Name is required"),
 ];
+
+export const updateProjectSchema = [
+	body("name")
+		.trim()
+		.notEmpty()
+		.withMessage("Name is required")
+		.custom((value) => {
+			const blockedEmails = ["string"];
+			if (blockedEmails.includes(value.toLowerCase())) {
+				throw new Error("Name is required");
+			}
+			return true;
+		}),
+
+	body("devMode")
+		.exists({ checkNull: true })
+		.withMessage("devMode is required")
+		.isBoolean()
+		.withMessage("devMode must be a boolean"),
+];
