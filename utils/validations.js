@@ -87,3 +87,7 @@ export const signInPayloadSchema = [
 			return true;
 		}),
 ];
+
+export const createProjectSchema = [
+	body("name").trim().notEmpty().withMessage("Name is required"),
+];

@@ -9,6 +9,9 @@
  *         - email
  *         - name
  *       properties:
+ *         _id:
+ *         type: string
+ *         description: Unique ID
  *         accountId:
  *           type: string
  *           description: Unique account ID
@@ -59,6 +62,7 @@
  *           format: date-time
  *           description: Account creation timestamp
  *       example:
+ *         _id: 687a03c9399764f331370f96
  *         accountId: 123e4567-e89b-12d3-a456-426614174000
  *         email: user@example.com
  *         name: Joh Doe
@@ -119,6 +123,7 @@
  * @swagger
  * tags:
  *   name: Auth
+ *   description: Authentication APIs
  */
 
 /**
@@ -206,6 +211,9 @@
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/User'
+ *                 token:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjY4N2EwM2M5Mzk5NzY0ZjMzMTM3MGY5NiIsImVtYWlsIjoiamlkZW90ZXRpY0BnbWFpbC5jb20ifSwiaWF0IjoxNzUyODI2ODI1LCJleHAiOjE3NTI5MTMyMjV9.d0f2-QQLd6f2F0vLcAA4CxVjjSNlsgMOzk37-AV5KwE
  *       400:
  *         description: Bad Request
  *       500:
@@ -252,6 +260,9 @@
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/User'
+ *                 token:
+ *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjY4N2EwM2M5Mzk5NzY0ZjMzMTM3MGY5NiIsImVtYWlsIjoiamlkZW90ZXRpY0BnbWFpbC5jb20ifSwiaWF0IjoxNzUyODI2ODI1LCJleHAiOjE3NTI5MTMyMjV9.d0f2-QQLd6f2F0vLcAA4CxVjjSNlsgMOzk37-AV5KwE
  *       400:
  *         description: Bad Request
  *       500:
@@ -261,7 +272,7 @@
 // /**
 //  * @swagger
 //  * /auth/google:
-//  *   post:
+//  *   get:
 //  *     summary: Login with Google
 //  *     tags: [Auth]
 //  *     responses:
@@ -281,8 +292,9 @@ import {
 	signUpPayloadSchema,
 	signInPayloadSchema,
 } from "../../utils/validations.js";
-import passport from "passport";
+import OAuth2Client from "google-auth-library";
 import jwt from "jsonwebtoken";
+import passport from "passport";
 
 const authRouter = Router();
 
@@ -301,5 +313,71 @@ authRouter.post(
 	validateSignInPayload,
 	passportAuthHandler("signin", 200)
 );
+
+// authRouter.get(
+// 	"/google",
+// 	passport.authenticate("google", { scope: ["profile"] })
+// );
+
+// authRouter.get(
+// 	"/google/callback",
+// 	passport.authenticate("google", { failureRedirect: "/login" }),
+// 	function (req, res) {
+// 		// Successful authentication, redirect home.
+// 		res.redirect("/");
+// 	}
+// );
+
+// authRouter.post("/google", async (req, res, next) => {
+// 	try {
+// 		const { id_token } = req.body;
+
+// 		if (!id_token) {
+// 			return next(new CustomBadRequestError("Missing Google ID token"));
+// 		}
+
+// 		const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+// 		const ticket = await client.verifyIdToken({
+// 			idToken: id_token,
+// 			audience: process.env.GOOGLE_CLIENT_ID,
+// 		});
+
+// 		const payload = ticket.getPayload();
+// 		const { sub: googleId, email, name, picture } = payload;
+
+// 		let user = await User.findOne({ googleId });
+
+// 		if (!user) {
+// 			// Create new user
+// 			user = new User({
+// 				googleId,
+// 				email,
+// 				name,
+// 				authProviders: ["google"],
+// 				avatar: picture, // optional
+// 			});
+// 			await user.save();
+// 		}
+
+// 		// Issue your own JWT
+// 		const token = jwt.sign(
+// 			{ user: { _id: user._id, email: user.email } },
+// 			process.env.JWT_SECRET,
+// 			{ expiresIn: "7d" }
+// 		);
+
+// 		const userObj = user.toObject();
+// 		delete userObj.password;
+
+// 		res.status(200).json({
+// 			statusCode: 200,
+// 			message: "Google sign-in successful",
+// 			user: { ...userObj, token },
+// 		});
+// 	} catch (err) {
+// 		next(err);
+// 	}
+// });
 
 export default authRouter;

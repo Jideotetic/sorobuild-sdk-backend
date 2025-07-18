@@ -53,15 +53,19 @@ const userSchema = new mongoose.Schema({
 		type: Number,
 		default: 100_000,
 	},
+	projectLimit: {
+		type: Number,
+		default: 3,
+	},
 	projects: {
 		type: [mongoose.Schema.Types.ObjectId],
 		ref: "Project",
-		validate: {
-			validator: function (arr) {
-				return arr.length <= 3;
-			},
-			message: "{PATH} limit exceeded",
-		},
+		// validate: {
+		// 	validator: function (arr) {
+		// 		return arr.length <= 3;
+		// 	},
+		// 	message: "{PATH} limit exceeded",
+		// },
 	},
 	createdAt: {
 		type: Date,

@@ -2,7 +2,8 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { User } from "../schemas/user.js";
 import { Project } from "../schemas/project.js";
-import bcrypt from "bcryptjs";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as JWTstrategy, ExtractJwt } from "passport-jwt";
 
 passport.use(
 	"signup",
@@ -82,3 +83,36 @@ passport.use(
 		}
 	)
 );
+
+passport.use(
+	new JWTstrategy(
+		{
+			secretOrKey: process.env.JWT_SECRET,
+			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+		},
+		async (token, done) => {
+			try {
+				return done(null, token.user);
+			} catch (error) {
+				done(error);
+			}
+		}
+	)
+);
+
+// passport.use(
+// 	"google",
+// 	new GoogleStrategy(
+// 		{
+// 			clientID: process.env.GOOGLE_CLIENT_ID,
+// 			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+// 			callbackURL: process.env.GOOGLE_CALLBACK_URL,
+// 		},
+// 		async (accessToken, refreshToken, profile, done) => {
+// 			console.log("==================>");
+// 			// User.findOrCreate({ googleId: profile.id }, function (err, user) {
+// 			return done(err, "user");
+// 			// });
+// 		}
+// 	)
+// );

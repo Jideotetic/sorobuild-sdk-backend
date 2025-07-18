@@ -7,6 +7,8 @@ import cors from "cors";
 import projectRouter from "./routes/project-router/projectRouter.js";
 import "./middlewares/passport.js";
 import CustomBadRequestError from "./errors/customBadRequestError.js";
+import passport from "passport";
+import CustomUnauthorizedError from "./errors/customUnauthorizedError.js";
 
 const app = express();
 
@@ -34,21 +36,34 @@ app.use(
 );
 
 app.use("/auth", authRouter);
-app.use("/project", projectRouter);
+app.use(
+	"/project",
+	async (req, res, next) => {
+		passport.authenticate("jwt", { session: false }, (err, user, info) => {
+			if (err || !user) {
+				const message = info.message;
+				next(new CustomUnauthorizedError(JSON.stringify(message)));
+			}
+			req.user = user;
+			next();
+		})(req, res, next);
+	},
+	projectRouter
+);
 
-app.use((err, req, res, next) => {
-	console.error(err);
+// app.use((err, req, res, next) => {
+// 	console.error(err);
 
-	if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
-		return next(
-			new CustomBadRequestError(
-				JSON.stringify(
-					"Invalid payload...Please check your request body format"
-				)
-			)
-		);
-	}
-});
+// 	if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+// 		return next(
+// 			new CustomBadRequestError(
+// 				JSON.stringify(
+// 					"Invalid payload...Please check your request body format"
+// 				)
+// 			)
+// 		);
+// 	}
+// });
 
 app.use((err, req, res, next) => {
 	console.error(err);
