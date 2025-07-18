@@ -125,7 +125,7 @@
  * @swagger
  * /auth/email:
  *   post:
- *     summary: Checks if email exist and send a response to request for password for authentication or onboard new user
+ *     summary: Checks if email exist and send a response to request password for authentication or onboard new user
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -198,10 +198,10 @@
  *               properties:
  *                 statusCode:
  *                   type: integer
- *                   example: 201
+ *                   example: 200
  *                 message:
  *                   type: string
- *                   example: User created successfully
+ *                   example: User authenticated successfully
  *                 user:
  *                   type: array
  *                   items:
@@ -216,7 +216,7 @@
  * @swagger
  * /auth/signup:
  *   post:
- *     summary: Creates a user
+ *     summary: Creates and authenticate a user
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -271,21 +271,35 @@
 
 import { Router } from "express";
 import {
-	checkEmail,
-	createUser,
+	validateEmailPayload,
+	validateSignUpPayload,
+	validateSignInPayload,
+	passportAuthHandler,
 } from "../../controllers/auth-controller/authController.js";
-import { validateEmail, validateUser } from "../../utils/validations.js";
+import {
+	emailPayloadSchema,
+	signUpPayloadSchema,
+	signInPayloadSchema,
+} from "../../utils/validations.js";
+import passport from "passport";
+import jwt from "jsonwebtoken";
 
 const authRouter = Router();
 
-authRouter.post("/email", validateEmail, checkEmail);
+authRouter.post("/email", emailPayloadSchema, validateEmailPayload);
 
-authRouter.post("/signin", validateUser, createUser);
+authRouter.post(
+	"/signup",
+	signUpPayloadSchema,
+	validateSignUpPayload,
+	passportAuthHandler("signup", 201)
+);
 
-authRouter.post("/signup", validateUser, createUser);
-
-// authRouter.post("/google", (req, res) => {
-// 	res.json(`Login with google`);
-// });
+authRouter.post(
+	"/signin",
+	signInPayloadSchema,
+	validateSignInPayload,
+	passportAuthHandler("signin", 200)
+);
 
 export default authRouter;

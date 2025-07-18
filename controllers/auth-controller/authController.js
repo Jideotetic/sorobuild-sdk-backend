@@ -1,9 +1,12 @@
 import { validationResult } from "express-validator";
 import { User } from "../../schemas/user.js";
-import bcrypt from "bcryptjs";
 import CustomBadRequestError from "../../errors/customBadRequestError.js";
+import passport from "passport";
+import { promisify } from "util";
+import jwt from "jsonwebtoken";
+import CustomNotFoundError from "../../errors/customNotFoundError.js";
 
-export async function checkEmail(req, res, next) {
+export async function validateEmailPayload(req, res, next) {
 	const errors = validationResult(req);
 
 	if (!errors.isEmpty()) {
@@ -38,45 +41,88 @@ export async function checkEmail(req, res, next) {
 	}
 }
 
-export async function createUser(req, res, next) {
+export async function validateSignUpPayload(req, res, next) {
 	const errors = validationResult(req);
 
-	if (!errors.isEmpty()) {
-		throw new CustomBadRequestError(JSON.stringify(errors.array()));
-	}
-
-	const { email, name, password } = req.body;
-
 	try {
-		const hashedPassword = await bcrypt.hash(password, 10);
+		if (!errors.isEmpty()) {
+			throw new CustomBadRequestError(JSON.stringify(errors.array()));
+		}
 
-		// const newUser = new User({
-		// 	email,
-		// 	name,
-		// 	password: hashedPassword,
-		// 	authProviders: ["email"],
-		// });
-
-		// await newUser.save();
-
-		// const newProject = new Project({
-		// 	owner: newUser._id,
-		// });
-
-		// await newProject.save();
-
-		// newUser.projects.push(newProject._id);
-		// await newUser.save();
-
-		const populatedUser = await User.findById(newUser._id).populate("projects");
-
-		return res.status(201).json({
-			statusCode: 201,
-			message: "User created successfully.",
-			user: populatedUser,
-		});
+		next();
 	} catch (error) {
 		console.error(error);
 		return next(error);
 	}
+}
+
+export async function validateSignInPayload(req, res, next) {
+	const errors = validationResult(req);
+
+	try {
+		if (!errors.isEmpty()) {
+			throw new CustomBadRequestError(JSON.stringify(errors.array()));
+		}
+
+		next();
+	} catch (error) {
+		console.error(error);
+		return next(error);
+	}
+}
+
+export async function handleAuthCallback(
+	req,
+	res,
+	next,
+	err,
+	user,
+	info,
+	successStatus
+) {
+	if (err || !user) {
+		const message = info.message || "Authentication failed";
+		if (message === "No user found ...Kindly sign up") {
+			return next(new CustomNotFoundError(JSON.stringify(message)));
+		} else if (
+			message === "Wrong password" ||
+			message === "User already exist...Kindly sign in"
+		) {
+			return next(new CustomBadRequestError(JSON.stringify(message)));
+		}
+	}
+
+	try {
+		await promisify(req.login).bind(req)(user, { session: false });
+
+		const JWT_SECRET = process.env.JWT_SECRET;
+
+		if (!JWT_SECRET) {
+			throw new Error("Missing JWT_SECRET in environment variables");
+		}
+
+		const body = { _id: user._id, email: user.email };
+		const token = jwt.sign({ user: body }, JWT_SECRET, {
+			expiresIn: "24h",
+		});
+
+		const userObj = user.toObject();
+		delete userObj.password;
+
+		return res.status(successStatus).json({
+			statusCode: successStatus,
+			message: info?.message || "Success",
+			user: { ...userObj, token },
+		});
+	} catch (error) {
+		return next(error);
+	}
+}
+
+export function passportAuthHandler(strategyName, statusCode) {
+	return (req, res, next) => {
+		passport.authenticate(strategyName, (err, user, info) => {
+			handleAuthCallback(req, res, next, err, user, info, statusCode);
+		})(req, res, next);
+	};
 }

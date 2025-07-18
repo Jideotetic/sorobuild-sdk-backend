@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 
-export const validateEmail = [
+export const emailPayloadSchema = [
 	body("email")
 		.trim()
 		.notEmpty()
@@ -16,7 +16,7 @@ export const validateEmail = [
 		}),
 ];
 
-export const validateUser = [
+export const signUpPayloadSchema = [
 	body("email")
 		.trim()
 		.notEmpty()
@@ -39,6 +39,36 @@ export const validateUser = [
 			const blockedName = ["string"];
 			if (blockedName.includes(value.toLowerCase())) {
 				throw new Error("Name is required");
+			}
+			return true;
+		}),
+
+	body("password")
+		.trim()
+		.notEmpty()
+		.withMessage("Password is required")
+		.isLength({ min: 6 })
+		.withMessage("Password must be at least 6 characters")
+		.custom((value) => {
+			const blockedPassword = ["string"];
+			if (blockedPassword.includes(value.toLowerCase())) {
+				throw new Error("Password is required");
+			}
+			return true;
+		}),
+];
+
+export const signInPayloadSchema = [
+	body("email")
+		.trim()
+		.notEmpty()
+		.withMessage("Email is required")
+		.isEmail()
+		.withMessage("Email is invalid")
+		.custom((value) => {
+			const blockedEmails = ["string"];
+			if (blockedEmails.includes(value.toLowerCase())) {
+				throw new Error("Email is required");
 			}
 			return true;
 		}),
