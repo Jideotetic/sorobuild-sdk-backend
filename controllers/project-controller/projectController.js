@@ -13,7 +13,7 @@ export async function createProject(req, res, next) {
 			throw new CustomBadRequestError(JSON.stringify(errors.array()));
 		}
 
-		const { name } = req.body;
+		const { name, whitelistedDomain } = req.body;
 		const { accountId: _id } = req.params;
 
 		if (!_id) {
@@ -43,6 +43,7 @@ export async function createProject(req, res, next) {
 		const newProject = new Project({
 			owner: user._id,
 			name,
+			whitelistedDomain,
 		});
 
 		await newProject.save();
@@ -54,6 +55,7 @@ export async function createProject(req, res, next) {
 		res.status(201).json({
 			statusCode: 201,
 			message: "Project created successfully",
+			project: newProject,
 		});
 	} catch (error) {
 		console.error(error);
@@ -102,7 +104,7 @@ export async function updateProject(req, res, next) {
 			throw new CustomBadRequestError(JSON.stringify(errors.array()));
 		}
 
-		const { name, devMode } = req.body;
+		const { name, devMode, whitelistedDomain } = req.body;
 		const { accountId: _id, projectId } = req.params;
 
 		if (!_id || !projectId) {
@@ -151,9 +153,98 @@ export async function updateProject(req, res, next) {
 		res.status(200).json({
 			statusCode: 200,
 			message: "Project updated successfully",
+			project: updatedProject,
 		});
 	} catch (error) {
 		console.error(error);
 		return next(error);
+	}
+}
+
+export async function deleteProject(req, res, next) {
+	try {
+		const { accountId: _id, projectId } = req.params;
+
+		if (!_id || !projectId) {
+			throw new CustomBadRequestError(
+				JSON.stringify("Account ID or Project ID missing")
+			);
+		}
+
+		if (!mongoose.Types.ObjectId.isValid(_id)) {
+			throw new CustomBadRequestError(
+				JSON.stringify("Invalid accountId format")
+			);
+		}
+
+		if (!mongoose.Types.ObjectId.isValid(projectId)) {
+			throw new CustomBadRequestError(
+				JSON.stringify("Invalid projectId format")
+			);
+		}
+
+		const user = await User.findOne({ _id });
+
+		if (!user) {
+			throw new CustomNotFoundError(
+				JSON.stringify("User not found with the provided account ID")
+			);
+		}
+
+		if (!user.projects.includes(projectId)) {
+			throw new CustomBadRequestError(
+				JSON.stringify("This project does not belong to the user")
+			);
+		}
+
+		const deletedProject = await Project.findOneAndDelete({
+			_id: projectId,
+			owner: user._id,
+		});
+
+		if (!deletedProject) {
+			throw new CustomNotFoundError("Project not found or already deleted");
+		}
+
+		user.projects = user.projects.filter((pId) => pId.toString() !== projectId);
+
+		await user.save();
+
+		res.status(200).json({
+			statusCode: 200,
+			message: "Project deleted successfully",
+		});
+	} catch (error) {
+		console.error(error);
+		return next(error);
+	}
+}
+
+export async function fetchAllProjects(req, res, next) {
+	try {
+		const start = parseInt(req.query.start) || 0;
+		const limit = parseInt(req.query.limit) || 10;
+
+		const projects = await Project.find()
+			.skip(start)
+			.limit(limit)
+			.sort({ createdAt: -1 });
+
+		const total = await Project.countDocuments();
+
+		res.status(200).json({
+			statusCode: 200,
+			message: "Projects fetched successfully",
+			projects,
+			pagination: {
+				start,
+				limit,
+				total,
+				hasNextPage: start + limit < total,
+			},
+		});
+	} catch (error) {
+		console.error(error);
+		next(error);
 	}
 }
