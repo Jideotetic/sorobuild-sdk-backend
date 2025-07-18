@@ -46,8 +46,14 @@
  *     summary: Create a new project
  *     tags: [Project]
  *     security:
- *       - bearerAuth: []
+ *       - Authorization: []
  *     parameters:
+ *       - in: header
+ *         name: idToken
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID token
  *       - in: path
  *         name: accountId
  *         required: true
@@ -104,8 +110,14 @@
  *     summary: Get all projects
  *     tags: [Project]
  *     security:
- *       - bearerAuth: []
+ *        - Authorization: []
  *     parameters:
+ *       - in: header
+ *         name: idToken
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID token
  *       - in: query
  *         name: start
  *         required: false
@@ -153,8 +165,14 @@
  *     summary: Get all projects link to an account
  *     tags: [Project]
  *     security:
- *       - bearerAuth: []
+ *        - Authorization: []
  *     parameters:
+ *       - in: header
+ *         name: idToken
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID token
  *       - in: path
  *         name: accountId
  *         required: true
@@ -194,8 +212,14 @@
  *     summary: Update a project
  *     tags: [Project]
  *     security:
- *       - bearerAuth: []
+ *        - Authorization: []
  *     parameters:
+ *       - in: header
+ *         name: idToken
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID token
  *       - in: path
  *         name: accountId
  *         required: true
@@ -259,8 +283,14 @@
  *     summary: Delete a project
  *     tags: [Project]
  *     security:
- *       - bearerAuth: []
+ *       - Authorization: []
  *     parameters:
+ *       - in: header
+ *         name: idToken
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID token
  *       - in: path
  *         name: accountId
  *         required: true

@@ -1,14 +1,14 @@
 import express from "express";
 import swaggerUi from "swagger-ui-express";
-import { specs } from "./swagger.js";
+import { specs } from "./utils/swagger.js";
 import authRouter from "./routes/auth-router/authRouter.js";
 import { connectToMongoDB } from "./model/db.js";
 import cors from "cors";
 import projectRouter from "./routes/project-router/projectRouter.js";
 import "./middlewares/passport.js";
 import CustomBadRequestError from "./errors/customBadRequestError.js";
-import passport from "passport";
-import CustomUnauthorizedError from "./errors/customUnauthorizedError.js";
+import rpcCreditsRouter from "./routes/rpc-credits/rpcCreditsRouter.js";
+import { authenticateAppUser, authenticateUser } from "./middlewares/guards.js";
 
 const app = express();
 
@@ -36,21 +36,11 @@ app.use(
 );
 
 app.use("/auth", authRouter);
-app.use(
-	"/project",
-	async (req, res, next) => {
-		passport.authenticate("jwt", { session: false }, (err, user, info) => {
-			if (err || !user) {
-				const message = info.message;
-				next(new CustomUnauthorizedError(JSON.stringify(message)));
-			}
-			req.user = user;
-			next();
-		})(req, res, next);
-	},
-	projectRouter
-);
 
+app.use("/project", authenticateAppUser, authenticateUser, projectRouter);
+app.use("rpc-credits", rpcCreditsRouter);
+
+// Error handlers
 app.use((err, req, res, next) => {
 	if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
 		return next(
