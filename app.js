@@ -51,27 +51,32 @@ app.use(
 	projectRouter
 );
 
-// app.use((err, req, res, next) => {
-// 	console.error(err);
-
-// 	if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
-// 		return next(
-// 			new CustomBadRequestError(
-// 				JSON.stringify(
-// 					"Invalid payload...Please check your request body format"
-// 				)
-// 			)
-// 		);
-// 	}
-// });
+app.use((err, req, res, next) => {
+	if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+		return next(
+			new CustomBadRequestError(
+				"Invalid payload. Please check your request body format."
+			)
+		);
+	}
+	next(err);
+});
 
 app.use((err, req, res, next) => {
 	console.error(err);
 
+	let message;
+
+	try {
+		message = JSON.parse(err.message);
+	} catch {
+		message = err.message || "Something went wrong";
+	}
+
 	res.status(err.statusCode || 500).json({
 		statusCode: err.statusCode || 500,
 		name: err.name || "InternalServerError",
-		message: JSON.parse(err.message) || "Something went wrong",
+		message,
 	});
 });
 
