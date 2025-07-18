@@ -1,5 +1,34 @@
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Project:
+ *       type: object
+ *       required:
+ *         - projectId
+ *       properties:
+ *         projectId:
+ *           type: string
+ *           description: Unique ID for the project
+ *         name:
+ *           type: string
+ *           description: Name of the project
+ *         devMode:
+ *           type: boolean
+ *           description: Whether the project is in developer mode
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Timestamp when the project was created
+ *       example:
+ *         projectId: 123e4567-e89b-12d3-a456-426614174000
+ *         name: Default Project
+ *         devMode: true
+ *         createdAt: 2025-07-16T12:00:00.000Z
+ */
+
+/**
+ * @swagger
  * tags:
  *   name: Project
  *   description: Project management APIs
@@ -77,10 +106,14 @@
  *               properties:
  *                 statusCode:
  *                   type: integer
- *                   example: 201
+ *                   example: 200
  *                 message:
  *                   type: string
- *                   example: Project created successfully
+ *                   example: Project fetched successfully
+ *                 projects:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Project'
  *       401:
  *         description: Unauthorized request
  *       400:
@@ -90,12 +123,15 @@
  */
 import { Router } from "express";
 import { createProjectSchema } from "../../utils/validations.js";
-import { createProject } from "../../controllers/project-contoller/projectController.js";
+import {
+	createProject,
+	fetchAllUserProjects,
+} from "../../controllers/project-contoller/projectController.js";
 
 const projectRouter = Router();
 
 projectRouter.post("/:accountId", createProjectSchema, createProject);
 
-projectRouter.get("/:accountId", () => {});
+projectRouter.get("/:accountId", fetchAllUserProjects);
 
 export default projectRouter;
