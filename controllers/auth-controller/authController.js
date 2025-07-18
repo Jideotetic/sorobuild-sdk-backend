@@ -5,6 +5,55 @@ import passport from "passport";
 import { promisify } from "util";
 import jwt from "jsonwebtoken";
 import CustomNotFoundError from "../../errors/customNotFoundError.js";
+import CustomUnauthorizedError from "../../errors/customUnauthorizedError.js";
+
+export const generateToken = async (req, res, next) => {
+	const errors = validationResult(req);
+
+	try {
+		if (!errors.isEmpty()) {
+			throw new CustomBadRequestError(JSON.stringify(errors.array()));
+		}
+
+		const { api_id, api_key } = req.body;
+
+		console.log({ api_id, api_key });
+
+		if (api_id !== process.env.API_ID || api_key !== process.env.API_KEY) {
+			throw new CustomBadRequestError(
+				JSON.stringify("Invalid api credentials")
+			);
+		}
+
+		const token = jwt.sign(
+			{
+				type: "app_user",
+				api_id,
+			},
+			process.env.JWT_SECRET,
+			{ expiresIn: "24h" }
+		);
+
+		return res.status(200).json({
+			statusCode: 200,
+			message: "Token generated successfully",
+			token,
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const authenticateAppUser = (req, res, next) => {
+	passport.authenticate("app-jwt", { session: false }, (err, type, info) => {
+		if (err || !type) {
+			const message = info?.message || "Unauthorized";
+			return next(new CustomUnauthorizedError(JSON.stringify(message)));
+		}
+		req.type = type;
+		next();
+	})(req, res, next);
+};
 
 export async function validateEmailPayload(req, res, next) {
 	const errors = validationResult(req);

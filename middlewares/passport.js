@@ -3,6 +3,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { User } from "../schemas/user.js";
 import { Project } from "../schemas/project.js";
 import { Strategy as JWTstrategy, ExtractJwt } from "passport-jwt";
+import { extractIdToken } from "../utils/lib.js";
 
 passport.use(
 	"signup",
@@ -85,16 +86,34 @@ passport.use(
 );
 
 passport.use(
+	"id-jwt",
 	new JWTstrategy(
 		{
 			secretOrKey: process.env.JWT_SECRET,
-			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+			jwtFromRequest: extractIdToken,
 		},
 		async (token, done) => {
 			try {
 				return done(null, token.user);
 			} catch (error) {
 				done(error);
+			}
+		}
+	)
+);
+
+passport.use(
+	"app-jwt",
+	new JWTstrategy(
+		{
+			secretOrKey: process.env.JWT_SECRET,
+			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken("Authorization"),
+		},
+		async (token, done) => {
+			try {
+				return done(null, token.type);
+			} catch (error) {
+				return done(error, false);
 			}
 		}
 	)

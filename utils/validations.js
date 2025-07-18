@@ -89,6 +89,32 @@ export const signInPayloadSchema = [
 		}),
 ];
 
+export const generateTokenPayloadSchema = [
+	body("api_id")
+		.trim()
+		.notEmpty()
+		.withMessage("api_id is required")
+		.custom((value) => {
+			const blockedEmails = ["string"];
+			if (blockedEmails.includes(value.toLowerCase())) {
+				throw new Error("api_id is required");
+			}
+			return true;
+		}),
+
+	body("api_key")
+		.trim()
+		.notEmpty()
+		.withMessage("api_key is required")
+		.custom((value) => {
+			const blockedPassword = ["string"];
+			if (blockedPassword.includes(value.toLowerCase())) {
+				throw new Error("api_key is required");
+			}
+			return true;
+		}),
+];
+
 export const createProjectSchema = [
 	body("name").trim().notEmpty().withMessage("Name is required"),
 

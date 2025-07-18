@@ -1,6 +1,6 @@
 import express from "express";
 import swaggerUi from "swagger-ui-express";
-import { specs } from "./swagger.js";
+import { specs } from "./utils/swagger.js";
 import authRouter from "./routes/auth-router/authRouter.js";
 import { connectToMongoDB } from "./model/db.js";
 import cors from "cors";
@@ -9,6 +9,8 @@ import "./middlewares/passport.js";
 import CustomBadRequestError from "./errors/customBadRequestError.js";
 import passport from "passport";
 import CustomUnauthorizedError from "./errors/customUnauthorizedError.js";
+import rpcCreditsRouter from "./routes/rpc-credits/rpcCreditsRouter.js";
+import { authenticateAppUser } from "./controllers/auth-controller/authController.js";
 
 const app = express();
 
@@ -36,12 +38,14 @@ app.use(
 );
 
 app.use("/auth", authRouter);
+
 app.use(
 	"/project",
+	authenticateAppUser,
 	async (req, res, next) => {
-		passport.authenticate("jwt", { session: false }, (err, user, info) => {
+		passport.authenticate("id-jwt", { session: false }, (err, user, info) => {
 			if (err || !user) {
-				const message = info.message;
+				const message = info.message || "Unauthorized";
 				next(new CustomUnauthorizedError(JSON.stringify(message)));
 			}
 			req.user = user;
@@ -50,7 +54,9 @@ app.use(
 	},
 	projectRouter
 );
+app.use("rpc-credits", rpcCreditsRouter);
 
+// Error handlers
 app.use((err, req, res, next) => {
 	if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
 		return next(

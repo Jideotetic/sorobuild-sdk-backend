@@ -82,10 +82,55 @@
 
 /**
  * @swagger
+ * /auth/generate:
+ *   post:
+ *     summary: Generate access token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               api_id:
+ *                 type: string
+ *                 example: string
+ *               api_key:
+ *                 type: string
+ *                 example: string
+ *     responses:
+ *       200:
+ *         description: Access token generated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Access token generated successfully
+ *                 token:
+ *                   type: string
+ *       429:
+ *         description: Too many request
+ *       400:
+ *         description: Bad Request
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
  * /auth/email:
  *   post:
  *     summary: Checks if email exist and send a response to request password for authentication or onboard new user
  *     tags: [Auth]
+ *     security:
+ *       - Authorization: []
  *     requestBody:
  *       required: true
  *       content:
@@ -134,6 +179,8 @@
  *   post:
  *     summary: Authenticate a user
  *     tags: [Auth]
+ *     security:
+ *       - Authorization: []
  *     requestBody:
  *       required: true
  *       content:
@@ -179,6 +226,8 @@
  *   post:
  *     summary: Creates and authenticate a user
  *     tags: [Auth]
+ *     security:
+ *       - Authorization: []
  *     requestBody:
  *       required: true
  *       content:
@@ -238,19 +287,31 @@ import {
 	validateSignUpPayload,
 	validateSignInPayload,
 	passportAuthHandler,
+	generateToken,
+	authenticateAppUser,
 } from "../../controllers/auth-controller/authController.js";
 import {
 	emailPayloadSchema,
 	signUpPayloadSchema,
 	signInPayloadSchema,
+	generateTokenPayloadSchema,
 } from "../../utils/validations.js";
+import { authRateLimiter } from "../../middlewares/rate-limit.js";
 
 const authRouter = Router();
 
-authRouter.post("/email", emailPayloadSchema, validateEmailPayload);
+authRouter.post("/generate", generateTokenPayloadSchema, generateToken);
+
+authRouter.post(
+	"/email",
+	authenticateAppUser,
+	emailPayloadSchema,
+	validateEmailPayload
+);
 
 authRouter.post(
 	"/signup",
+	authenticateAppUser,
 	signUpPayloadSchema,
 	validateSignUpPayload,
 	passportAuthHandler("signup", 201)
@@ -258,6 +319,7 @@ authRouter.post(
 
 authRouter.post(
 	"/signin",
+	authenticateAppUser,
 	signInPayloadSchema,
 	validateSignInPayload,
 	passportAuthHandler("signin", 200)
