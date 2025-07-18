@@ -2,6 +2,7 @@ import { validationResult } from "express-validator";
 import CustomBadRequestError from "../../errors/customBadRequestError.js";
 import { User } from "../../schemas/user.js";
 import { Project } from "../../schemas/project.js";
+import CustomNotFoundError from "../../errors/customNotFoundError.js";
 
 export async function createProject(req, res, next) {
 	const errors = validationResult(req);
@@ -48,5 +49,32 @@ export async function createProject(req, res, next) {
 	} catch (error) {
 		console.error(error);
 		return next(error);
+	}
+}
+
+export async function fetchAllUserProjects(req, res, next) {
+	try {
+		const { accountId: _id } = req.params;
+
+		if (!_id) {
+			throw new CustomBadRequestError(JSON.stringify("Account ID missing"));
+		}
+
+		const user = await User.findOne({ _id }).populate("projects");
+
+		if (!user) {
+			throw new CustomNotFoundError(
+				JSON.stringify("User not found with the provided account ID")
+			);
+		}
+
+		res.status(200).json({
+			statusCode: 200,
+			message: "User projects fetched successfully",
+			projects: user.projects,
+		});
+	} catch (error) {
+		console.error(error);
+		next(error);
 	}
 }

@@ -52,6 +52,10 @@
  *         rpcCredits:
  *           type: number
  *           description: Available RPC credits
+ *         whitelistedDomain:
+ *           type: string
+ *           format: hostname
+ *           description: Domain allowed to use this project
  *         projects:
  *           type: array
  *           items:
@@ -77,46 +81,11 @@
  *           {
  *             projectId: 123e4567-e89b-12d3-a456-426614174000,
  *             name: Default Project,
- *             whitelistedDomain: example.com,
  *             devMode: true,
  *             createdAt: 2025-07-16T12:00:00.000Z
  *            }
  *          ]
  *         createdAt: 2025-07-16T15:00:00.000Z
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Project:
- *       type: object
- *       required:
- *         - projectId
- *       properties:
- *         projectId:
- *           type: string
- *           description: Unique ID for the project
- *         name:
- *           type: string
- *           description: Name of the project
- *         whitelistedDomain:
- *           type: string
- *           format: hostname
- *           description: Domain allowed to use this project
- *         devMode:
- *           type: boolean
- *           description: Whether the project is in developer mode
- *         createdAt:
- *           type: string
- *           format: date-time
- *           description: Timestamp when the project was created
- *       example:
- *         projectId: 123e4567-e89b-12d3-a456-426614174000
- *         name: Default Project
- *         whitelistedDomain: example.com
- *         devMode: true
- *         createdAt: 2025-07-16T12:00:00.000Z
  */
 
 /**
