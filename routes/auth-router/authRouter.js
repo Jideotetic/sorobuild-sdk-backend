@@ -288,7 +288,6 @@ import {
 	validateSignInPayload,
 	passportAuthHandler,
 	generateToken,
-	authenticateAppUser,
 } from "../../controllers/auth-controller/authController.js";
 import {
 	emailPayloadSchema,
@@ -297,6 +296,7 @@ import {
 	generateTokenPayloadSchema,
 } from "../../utils/validations.js";
 import { authRateLimiter } from "../../middlewares/rate-limit.js";
+import { authenticateAppUser } from "../../middlewares/guards.js";
 
 const authRouter = Router();
 
