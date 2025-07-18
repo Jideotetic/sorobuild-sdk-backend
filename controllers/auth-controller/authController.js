@@ -9,13 +9,13 @@ import CustomNotFoundError from "../../errors/customNotFoundError.js";
 export async function validateEmailPayload(req, res, next) {
 	const errors = validationResult(req);
 
-	if (!errors.isEmpty()) {
-		throw new CustomBadRequestError(JSON.stringify(errors.array()));
-	}
-
-	const { email } = req.body;
-
 	try {
+		if (!errors.isEmpty()) {
+			throw new CustomBadRequestError(JSON.stringify(errors.array()));
+		}
+
+		const { email } = req.body;
+
 		const existingUser = await User.findOne({ email });
 
 		if (existingUser) {
@@ -78,7 +78,7 @@ export async function handleAuthCallback(
 	err,
 	user,
 	info,
-	successStatus
+	statusCode
 ) {
 	if (err || !user) {
 		const message = info.message || "Authentication failed";
@@ -109,8 +109,8 @@ export async function handleAuthCallback(
 		const userObj = user.toObject();
 		delete userObj.password;
 
-		return res.status(successStatus).json({
-			statusCode: successStatus,
+		return res.status(statusCode).json({
+			statusCode,
 			message: info?.message || "Success",
 			user: { ...userObj, token },
 		});
