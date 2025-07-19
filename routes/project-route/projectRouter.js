@@ -14,6 +14,9 @@
  *         whitelistedDomain:
  *           type: string
  *           description: Domain allowed to use this project
+ *         projectKey:
+ *           type: string
+ *           description: Unique key to identify a project
  *         devMode:
  *           type: boolean
  *           description: Whether the project is in development mode
@@ -92,6 +95,7 @@
  *                    _id: 687a03c9399764f331370f96
  *                    name: Default Project
  *                    whitelistedDomain: https://example.com
+ *                    projectKey: 687a03c9399764f331370f96
  *                    devMode: true
  *                    owner: 687a03c9399764f331370f96
  *                    createdAt: 2025-07-16T12:00:00.000Z
