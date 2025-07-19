@@ -295,12 +295,17 @@ import {
 	signInPayloadSchema,
 	generateTokenPayloadSchema,
 } from "../../utils/validations.js";
-import { authRateLimiter } from "../../middlewares/rate-limit.js";
 import { authenticateAppUser } from "../../middlewares/guards.js";
+import { authRateLimiter } from "../../middlewares/rate-limit.js";
 
 const authRouter = Router();
 
-authRouter.post("/generate", generateTokenPayloadSchema, generateToken);
+authRouter.post(
+	"/generate",
+	authRateLimiter,
+	generateTokenPayloadSchema,
+	generateToken
+);
 
 authRouter.post(
 	"/email",

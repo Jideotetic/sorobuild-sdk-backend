@@ -162,3 +162,11 @@ export const updateProjectSchema = [
 		.isBoolean()
 		.withMessage("devMode must be a boolean"),
 ];
+
+export const rpcCreditsPayloadSchema = [
+	body("rpcCredits")
+		.notEmpty()
+		.withMessage("rpcCredits is required")
+		.isInt({ gt: 0 })
+		.withMessage("rpcCredits must be greater than 0"),
+];

@@ -1,14 +1,15 @@
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { specs } from "./utils/swagger.js";
-import authRouter from "./routes/auth-router/authRouter.js";
+import authRouter from "./routes/auth-route/authRouter.js";
 import { connectToMongoDB } from "./model/db.js";
 import cors from "cors";
-import projectRouter from "./routes/project-router/projectRouter.js";
+import projectRouter from "./routes/project-route/projectRouter.js";
 import "./middlewares/passport.js";
 import CustomBadRequestError from "./errors/customBadRequestError.js";
-import rpcCreditsRouter from "./routes/rpc-credits/rpcCreditsRouter.js";
+import rpcCreditsRouter from "./routes/rpc-credits-route/rpcCreditsRouter.js";
 import { authenticateAppUser, authenticateUser } from "./middlewares/guards.js";
+import rpcHorizonRouter from "./routes/rpc-horizon-route/rpcHorizonRouter.js";
 
 const app = express();
 
@@ -29,16 +30,21 @@ app.use(
 	"/api-docs",
 	swaggerUi.serve,
 	swaggerUi.setup(specs, {
-		explorer: true,
+		// explorer: true,
 		// customCssUrl:
 		// 	"https://cdn.jsdelivr.net/npm/swagger-ui-themes@3.0.0/themes/3.x/theme-newspaper.css",
 	})
 );
 
 app.use("/auth", authRouter);
-
 app.use("/project", authenticateAppUser, authenticateUser, projectRouter);
-app.use("rpc-credits", rpcCreditsRouter);
+app.use(
+	"/rpc-credits",
+	authenticateAppUser,
+	authenticateUser,
+	rpcCreditsRouter
+);
+app.use("/rpc-horizon", rpcHorizonRouter);
 
 // Error handlers
 app.use((err, req, res, next) => {

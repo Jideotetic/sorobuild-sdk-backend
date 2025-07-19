@@ -1,4 +1,5 @@
 import passport from "passport";
+import CustomUnauthorizedError from "../errors/customUnauthorizedError.js";
 
 export const authenticateAppUser = (req, res, next) => {
 	passport.authenticate("app-jwt", { session: false }, (err, type, info) => {
