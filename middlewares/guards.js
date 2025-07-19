@@ -1,7 +1,11 @@
 import passport from "passport";
 import CustomUnauthorizedError from "../errors/customUnauthorizedError.js";
 
-const trustedClients = ["https://soro.build", "http:localhost:5173"];
+const trustedClients = [
+	"https://soro.build",
+	"http://localhost:3000",
+	"http://localhost:5173",
+];
 
 function isTrustedClient(req) {
 	const origin = req.headers.origin;
