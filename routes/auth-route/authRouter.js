@@ -6,7 +6,6 @@
  *       type: object
  *       required:
  *         - email
- *         - name
  *       properties:
  *         _id:
  *          type: string
@@ -21,6 +20,9 @@
  *           type: string
  *           nullable: true
  *           description: File ID of avatar image
+ *         isVerified:
+ *           type: boolean
+ *           description: Flag for when user complete registration
  *         authProviders:
  *           type: array
  *           items:
@@ -55,6 +57,7 @@
  *         email: user@example.com
  *         name: Joh Doe
  *         avatar: 687a03c9399764f331370f96
+ *         isVerified: false
  *         authProviders: [email]
  *         googleId: null
  *         githubId: null
@@ -270,6 +273,57 @@
  *         description: Internal server error
  */
 
+/**
+ * @swagger
+ * /auth/verify:
+ *   post:
+ *     summary: Creates and authenticate a user
+ *     tags: [Auth]
+ *     security:
+ *       - Authorization: []
+ *     parameters:
+ *       - in: query
+ *         name: verificationToken
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The verification token embedded in the link sent
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               password:
+ *                  type: string
+ *                  example: string
+ *     responses:
+ *       200:
+ *         description: User verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: User verified successfully
+ *                 user:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: Bad Request
+ *       500:
+ *         description: Internal server error
+ */
+
 // /**
 //  * @swagger
 //  * /auth/google:
@@ -288,12 +342,14 @@ import {
 	validateSignInPayload,
 	passportAuthHandler,
 	generateToken,
+	verifyUser,
 } from "../../controllers/auth-controller/authController.js";
 import {
 	emailPayloadSchema,
 	signUpPayloadSchema,
 	signInPayloadSchema,
 	generateTokenPayloadSchema,
+	passwordSchema,
 } from "../../utils/validations.js";
 import { authenticateAppUser } from "../../middlewares/guards.js";
 import { authRateLimiter } from "../../middlewares/rate-limit.js";
@@ -327,6 +383,13 @@ authRouter.post(
 	authenticateAppUser,
 	signInPayloadSchema,
 	validateSignInPayload,
+	passportAuthHandler("signin", 200)
+);
+
+authRouter.post(
+	"/verify",
+	passwordSchema,
+	verifyUser,
 	passportAuthHandler("signin", 200)
 );
 

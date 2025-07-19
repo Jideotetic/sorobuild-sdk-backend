@@ -36,6 +36,7 @@ app.use(
 	})
 );
 
+app.get("/", authenticateAppUser, authenticateUser)
 app.use("/auth", authRouter);
 app.use("/project", authenticateAppUser, authenticateUser, projectRouter);
 app.use(

@@ -1,11 +1,13 @@
 import { validationResult } from "express-validator";
 import { User } from "../../schemas/user.js";
+import { Project } from "../../schemas/project.js";
 import CustomBadRequestError from "../../errors/customBadRequestError.js";
 import passport from "passport";
 import { promisify } from "util";
 import jwt from "jsonwebtoken";
 import CustomNotFoundError from "../../errors/customNotFoundError.js";
-import CustomUnauthorizedError from "../../errors/customUnauthorizedError.js";
+import crypto from "crypto";
+import { sendOnboardingEmail } from "../../services/emailService.js";
 
 export const generateToken = async (req, res, next) => {
 	const errors = validationResult(req);
@@ -16,8 +18,6 @@ export const generateToken = async (req, res, next) => {
 		}
 
 		const { api_id, api_key } = req.body;
-
-		console.log({ api_id, api_key });
 
 		if (api_id !== process.env.API_ID || api_key !== process.env.API_KEY) {
 			throw new CustomBadRequestError(
@@ -56,7 +56,7 @@ export async function validateEmailPayload(req, res, next) {
 
 		const existingUser = await User.findOne({ email });
 
-		if (existingUser) {
+		if (existingUser && existingUser.isVerified) {
 			return res.status(200).json({
 				statusCode: 200,
 				message: "User exist, Prompt for password.",
@@ -64,18 +64,94 @@ export async function validateEmailPayload(req, res, next) {
 				userExists: true,
 				nextAction: "REQUEST_PASSWORD",
 			});
-		} else {
+		}
+
+		if (existingUser && !existingUser.isVerified) {
 			return res.status(200).json({
 				statusCode: 200,
-				message: "User not found, Proceed to onboarding.",
+				message:
+					"User exist, Check the previous email that was sent to complete registration.",
 				email: email,
-				userExists: false,
-				nextAction: "ONBOARD_NEW_USER",
+				userExists: true,
+				nextAction: "COMPLETE_EMAIL_VERIFICATION",
 			});
 		}
+
+		const hash = crypto.createHash("sha256");
+		hash.update(email + crypto.randomBytes(32).toString("hex"));
+		const verificationToken = hash.digest("hex");
+
+		// const newUser = new User({
+		// 	email,
+		// 	verificationToken,
+		// 	authProviders: ["email"],
+		// });
+		// await newUser.save();
+
+		await sendOnboardingEmail(email, verificationToken);
+
+		return res.status(200).json({
+			statusCode: 200,
+			message: "Check your email to complete registration.",
+			email,
+			userExists: false,
+			nextAction: "COMPLETE_EMAIL_VERIFICATION",
+		});
 	} catch (error) {
 		console.error(error);
 		return next(error);
+	}
+}
+
+export async function verifyUser(req, res, next) {
+	const errors = validationResult(req);
+	try {
+		if (!errors.isEmpty()) {
+			throw new CustomBadRequestError(JSON.stringify(errors.array()));
+		}
+
+		const { verificationToken } = req.query;
+		const { password } = req.body;
+
+		if (!verificationToken) {
+			throw new CustomBadRequestError(
+				JSON.stringify("Verification token is missing.")
+			);
+		}
+
+		const user = await User.findOne({ verificationToken });
+
+		user;
+
+		if (!user) {
+			throw new CustomBadRequestError(
+				JSON.stringify("Invalid or expired verification token.")
+			);
+		}
+
+		user.isVerified = true;
+		user.verificationToken = null;
+		user.password = password;
+
+		await user.save();
+
+		const newProject = new Project({
+			owner: user._id,
+			whitelistedDomain: "",
+		});
+
+		await newProject.save();
+
+		user.projects.push(newProject._id);
+		await user.save();
+
+		// Add email to request body to sign in user
+		req.body.email = user.email;
+
+		next();
+	} catch (err) {
+		console.error(err);
+		next(err);
 	}
 }
 

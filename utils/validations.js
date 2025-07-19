@@ -59,6 +59,22 @@ export const signUpPayloadSchema = [
 		}),
 ];
 
+export const passwordSchema = [
+	body("password")
+		.trim()
+		.notEmpty()
+		.withMessage("Password is required")
+		.isLength({ min: 6 })
+		.withMessage("Password must be at least 6 characters")
+		.custom((value) => {
+			const blockedPassword = ["string"];
+			if (blockedPassword.includes(value.toLowerCase())) {
+				throw new Error("Password is required");
+			}
+			return true;
+		}),
+];
+
 export const signInPayloadSchema = [
 	body("email")
 		.trim()
