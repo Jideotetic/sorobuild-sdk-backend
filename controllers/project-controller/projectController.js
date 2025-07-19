@@ -22,7 +22,7 @@ export async function createProject(req, res, next) {
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
 			throw new CustomBadRequestError(
-				JSON.stringify("Invalid accountId format")
+				JSON.stringify("Invalid accountId")
 			);
 		}
 
@@ -73,7 +73,7 @@ export async function fetchAllUserProjects(req, res, next) {
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
 			throw new CustomBadRequestError(
-				JSON.stringify("Invalid accountId format")
+				JSON.stringify("Invalid accountId")
 			);
 		}
 
@@ -115,7 +115,7 @@ export async function updateProject(req, res, next) {
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
 			throw new CustomBadRequestError(
-				JSON.stringify("Invalid accountId format")
+				JSON.stringify("Invalid accountId")
 			);
 		}
 
@@ -173,7 +173,7 @@ export async function deleteProject(req, res, next) {
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
 			throw new CustomBadRequestError(
-				JSON.stringify("Invalid accountId format")
+				JSON.stringify("Invalid accountId")
 			);
 		}
 
