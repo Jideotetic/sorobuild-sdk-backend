@@ -15,9 +15,24 @@ const app = express();
 
 await connectToMongoDB();
 
+const allowedOrigins = [
+	"https://soro.build",
+	"http://localhost:5173",
+	"http://localhost:3000",
+];
+
 const corsOptions = {
-	origin: "https://rust-ide-five.vercel.app",
+	origin: function (origin, callback) {
+		// // Allow requests with no origin (like curl or mobile apps)
+		// if (!origin) return callback(null, true);
+		if (allowedOrigins.includes(origin)) {
+			callback(null, true);
+		} else {
+			callback(new Error("Not allowed by CORS"));
+		}
+	},
 	optionsSuccessStatus: 200,
+	credentials: true,
 };
 
 app.use(cors(corsOptions));
