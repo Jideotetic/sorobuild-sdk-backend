@@ -46,6 +46,16 @@ app.use(
 );
 app.use("/rpc-horizon", rpcHorizonRouter);
 
+app.all("/", authenticateAppUser, authenticateUser, (req, res, next) => {
+	const error = new CustomBadRequestError(`Route ${req.originalUrl} not found`);
+	next(error);
+});
+
+app.all("/*splat", authenticateAppUser, authenticateUser, (req, res, next) => {
+	const error = new CustomBadRequestError(`Route ${req.originalUrl} not found`);
+	next(error);
+});
+
 // Error handlers
 app.use((err, req, res, next) => {
 	if (err instanceof SyntaxError && err.status === 400 && "body" in err) {

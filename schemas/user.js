@@ -11,10 +11,18 @@ const userSchema = new mongoose.Schema({
 	},
 	name: {
 		type: String,
-		required: true,
 		trim: true,
+		default: null,
 	},
 	password: {
+		type: String,
+		default: null,
+	},
+	isVerified: {
+		type: Boolean,
+		default: false,
+	},
+	verificationToken: {
 		type: String,
 		default: null,
 	},
