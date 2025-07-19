@@ -19,13 +19,12 @@ const allowedOrigins = [
 	"https://soro.build",
 	"http://localhost:5173",
 	"http://localhost:3000",
-	"https://sorobuild-sdk-backend.onrender.com",
 ];
 
 const corsOptions = {
 	origin: function (origin, callback) {
 		// // Allow requests with no origin (like curl or mobile apps)
-		// if (!origin) return callback(null, true);
+		if (!origin) return callback(null, true);
 		if (allowedOrigins.includes(origin)) {
 			callback(null, true);
 		} else {
