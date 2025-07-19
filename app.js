@@ -16,7 +16,7 @@ const app = express();
 await connectToMongoDB();
 
 const corsOptions = {
-	origin: "http://example.com",
+	origin: "https://rust-ide-five.vercel.app",
 	optionsSuccessStatus: 200,
 };
 
