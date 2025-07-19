@@ -81,12 +81,12 @@ export async function validateEmailPayload(req, res, next) {
 		hash.update(email + crypto.randomBytes(32).toString("hex"));
 		const verificationToken = hash.digest("hex");
 
-		// const newUser = new User({
-		// 	email,
-		// 	verificationToken,
-		// 	authProviders: ["email"],
-		// });
-		// await newUser.save();
+		const newUser = new User({
+			email,
+			verificationToken,
+			authProviders: ["email"],
+		});
+		await newUser.save();
 
 		await sendOnboardingEmail(email, verificationToken);
 

@@ -223,61 +223,61 @@
  *         description: Internal server error
  */
 
-/**
- * @swagger
- * /auth/signup:
- *   post:
- *     summary: Creates and authenticate a user
- *     tags: [Auth]
- *     security:
- *       - Authorization: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: string
- *               name:
- *                 type: string
- *                 example: string
- *               password:
- *                  type: string
- *                  example: string
- *     responses:
- *       201:
- *         description: User created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 statusCode:
- *                   type: integer
- *                   example: 201
- *                 message:
- *                   type: string
- *                   example: User created successfully
- *                 user:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/User'
- *                 token:
- *                   type: string
- *       400:
- *         description: Bad Request
- *       500:
- *         description: Internal server error
- */
+// /**
+//  * @swagger
+//  * /auth/signup:
+//  *   post:
+//  *     summary: Creates and authenticate a user
+//  *     tags: [Auth]
+//  *     security:
+//  *       - Authorization: []
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               email:
+//  *                 type: string
+//  *                 example: string
+//  *               name:
+//  *                 type: string
+//  *                 example: string
+//  *               password:
+//  *                  type: string
+//  *                  example: string
+//  *     responses:
+//  *       201:
+//  *         description: User created successfully
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 statusCode:
+//  *                   type: integer
+//  *                   example: 201
+//  *                 message:
+//  *                   type: string
+//  *                   example: User created successfully
+//  *                 user:
+//  *                   type: array
+//  *                   items:
+//  *                     $ref: '#/components/schemas/User'
+//  *                 token:
+//  *                   type: string
+//  *       400:
+//  *         description: Bad Request
+//  *       500:
+//  *         description: Internal server error
+//  */
 
 /**
  * @swagger
  * /auth/verify:
  *   post:
- *     summary: Creates and authenticate a user
+ *     summary: Verify email to complete registration
  *     tags: [Auth]
  *     security:
  *       - Authorization: []
@@ -300,7 +300,7 @@
  *                  example: string
  *     responses:
  *       200:
- *         description: User verified successfully
+ *         description: User authenticated successfully
  *         content:
  *           application/json:
  *             schema:
@@ -311,7 +311,7 @@
  *                   example: 200
  *                 message:
  *                   type: string
- *                   example: User verified successfully
+ *                   example: User authenticated successfully
  *                 user:
  *                   type: array
  *                   items:
@@ -370,12 +370,19 @@ authRouter.post(
 	validateEmailPayload
 );
 
+// authRouter.post(
+// 	"/signup",
+// 	authenticateAppUser,
+// 	signUpPayloadSchema,
+// 	validateSignUpPayload,
+// 	passportAuthHandler("signup", 201)
+// );
+
 authRouter.post(
-	"/signup",
-	authenticateAppUser,
-	signUpPayloadSchema,
-	validateSignUpPayload,
-	passportAuthHandler("signup", 201)
+	"/verify",
+	passwordSchema,
+	verifyUser,
+	passportAuthHandler("signin", 200)
 );
 
 authRouter.post(
@@ -383,13 +390,6 @@ authRouter.post(
 	authenticateAppUser,
 	signInPayloadSchema,
 	validateSignInPayload,
-	passportAuthHandler("signin", 200)
-);
-
-authRouter.post(
-	"/verify",
-	passwordSchema,
-	verifyUser,
 	passportAuthHandler("signin", 200)
 );
 
