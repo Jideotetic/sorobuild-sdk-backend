@@ -137,7 +137,6 @@ export async function verifyUser(req, res, next) {
 
 		const newProject = new Project({
 			owner: user._id,
-			whitelistedDomain: "",
 		});
 
 		await newProject.save();
@@ -202,6 +201,8 @@ export async function handleAuthCallback(
 			message === "Wrong password" ||
 			message === "User already exist...Kindly sign in"
 		) {
+			return next(new CustomBadRequestError(JSON.stringify(message)));
+		} else {
 			return next(new CustomBadRequestError(JSON.stringify(message)));
 		}
 	}

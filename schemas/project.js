@@ -8,10 +8,15 @@ const projectSchema = new mongoose.Schema({
 	},
 	whitelistedDomain: {
 		type: String,
+		default: null,
 	},
 	devMode: {
 		type: Boolean,
 		default: true,
+	},
+	projectKey: {
+		type: String,
+		default: uuidv4(),
 	},
 	owner: {
 		type: mongoose.Schema.Types.ObjectId,

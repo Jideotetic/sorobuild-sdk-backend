@@ -71,6 +71,13 @@ passport.use(
 					});
 				}
 
+				if (!user.isVerified) {
+					return done(null, false, {
+						message:
+							"Kindly verify you account with the link sent to your email",
+					});
+				}
+
 				const validate = await user.isValidPassword(password);
 
 				if (!validate) {
