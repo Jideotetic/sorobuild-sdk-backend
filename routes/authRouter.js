@@ -338,21 +338,19 @@
 import { Router } from "express";
 import {
 	validateEmailPayload,
-	validateSignUpPayload,
 	validateSignInPayload,
 	passportAuthHandler,
 	generateToken,
 	verifyUser,
-} from "../../controllers/auth-controller/authController.js";
+} from "../controllers/authController.js";
 import {
 	emailPayloadSchema,
-	signUpPayloadSchema,
 	signInPayloadSchema,
 	generateTokenPayloadSchema,
 	passwordSchema,
-} from "../../utils/validations.js";
-import { authenticateAppUser } from "../../middlewares/guards.js";
-import { authRateLimiter } from "../../middlewares/rate-limit.js";
+} from "../utils/validations.js";
+import { verifyAuthorizationToken } from "../middlewares/guards.js";
+import { authRateLimiter } from "../middlewares/rate-limit.js";
 
 const authRouter = Router();
 
@@ -365,14 +363,14 @@ authRouter.post(
 
 authRouter.post(
 	"/email",
-	authenticateAppUser,
+	verifyAuthorizationToken,
 	emailPayloadSchema,
 	validateEmailPayload
 );
 
 // authRouter.post(
 // 	"/signup",
-// 	authenticateAppUser,
+// 	verifyAuthorizationToken,
 // 	signUpPayloadSchema,
 // 	validateSignUpPayload,
 // 	passportAuthHandler("signup", 201)
@@ -380,6 +378,7 @@ authRouter.post(
 
 authRouter.post(
 	"/verify",
+	verifyAuthorizationToken,
 	passwordSchema,
 	verifyUser,
 	passportAuthHandler("signin", 200)
@@ -387,7 +386,7 @@ authRouter.post(
 
 authRouter.post(
 	"/signin",
-	authenticateAppUser,
+	verifyAuthorizationToken,
 	signInPayloadSchema,
 	validateSignInPayload,
 	passportAuthHandler("signin", 200)

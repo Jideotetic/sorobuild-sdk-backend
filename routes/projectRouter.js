@@ -333,14 +333,14 @@ import { Router } from "express";
 import {
 	createProjectSchema,
 	updateProjectSchema,
-} from "../../utils/validations.js";
+} from "../utils/validations.js";
 import {
 	createProject,
 	deleteProject,
 	fetchAllProjects,
 	fetchAllUserProjects,
 	updateProject,
-} from "../../controllers/project-controller/projectController.js";
+} from "../controllers/projectController.js";
 
 const projectRouter = Router();
 
