@@ -107,60 +107,60 @@
  *         description: Internal server error
  */
 
-/**
- * @swagger
- * /project:
- *   get:
- *     summary: Get all projects
- *     tags: [Project]
- *     security:
- *        - Authorization: []
- *     parameters:
- *       - in: header
- *         name: idToken
- *         schema:
- *           type: string
- *         required: true
- *         description: ID token
- *       - in: query
- *         name: start
- *         required: false
- *         schema:
- *           type: integer
- *           default: 0
- *         description: Pagination offset
- *       - in: query
- *         name: limit
- *         required: false
- *         schema:
- *           type: integer
- *           default: 10
- *         description: Number of projects to return
- *     responses:
- *       200:
- *         description: Projects fetched successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 statusCode:
- *                   type: integer
- *                   example: 200
- *                 message:
- *                   type: string
- *                   example: Project fetched successfully
- *                 projects:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Project'
- *       401:
- *         description: Unauthorized request
- *       400:
- *         description: Bad request
- *       500:
- *         description: Internal server error
- */
+// /**
+//  * @swagger
+//  * /project:
+//  *   get:
+//  *     summary: Get all projects
+//  *     tags: [Project]
+//  *     security:
+//  *        - Authorization: []
+//  *     parameters:
+//  *       - in: header
+//  *         name: idToken
+//  *         schema:
+//  *           type: string
+//  *         required: true
+//  *         description: ID token
+//  *       - in: query
+//  *         name: start
+//  *         required: false
+//  *         schema:
+//  *           type: integer
+//  *           default: 0
+//  *         description: Pagination offset
+//  *       - in: query
+//  *         name: limit
+//  *         required: false
+//  *         schema:
+//  *           type: integer
+//  *           default: 10
+//  *         description: Number of projects to return
+//  *     responses:
+//  *       200:
+//  *         description: Projects fetched successfully
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 statusCode:
+//  *                   type: integer
+//  *                   example: 200
+//  *                 message:
+//  *                   type: string
+//  *                   example: Project fetched successfully
+//  *                 projects:
+//  *                   type: array
+//  *                   items:
+//  *                     $ref: '#/components/schemas/Project'
+//  *       401:
+//  *         description: Unauthorized request
+//  *       400:
+//  *         description: Bad request
+//  *       500:
+//  *         description: Internal server error
+//  */
 
 /**
  * @swagger
@@ -337,7 +337,6 @@ import {
 import {
 	createProject,
 	deleteProject,
-	fetchAllProjects,
 	fetchAllUserProjects,
 	updateProject,
 } from "../controllers/projectController.js";
@@ -350,7 +349,7 @@ projectRouter.post(
 	createProject
 );
 
-projectRouter.get("/", fetchAllProjects);
+// projectRouter.get("/", fetchAllProjects);
 
 projectRouter.get("/:accountId", fetchAllUserProjects);
 
