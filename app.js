@@ -32,6 +32,8 @@ const allowedOrigins = [
 	"https://sorobuild-sdk-backend.onrender.com",
 ];
 
+
+// Cors stuff
 const corsOptions = {
 	origin: function (origin, callback) {
 		if (!origin) return callback(null, true);

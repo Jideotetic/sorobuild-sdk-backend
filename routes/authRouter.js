@@ -15,6 +15,7 @@
  *           description: User's email address
  *         name:
  *           type: string
+ *           nullable: true
  *           description: User's name
  *         avatar:
  *           type: string
@@ -80,7 +81,7 @@
  * @swagger
  * tags:
  *   name: Auth
- *   description: Authentication APIs
+ *   description: Authentication management APIs
  */
 
 /**
@@ -170,6 +171,8 @@
  *                     - ONBOARD_NEW_USER
  *                     - REQUEST_PASSWORD
  *                   example: REQUEST_PASSWORD
+ *       401:
+ *         description: Unauthorized Request
  *       400:
  *         description: Bad Request
  *       500:
@@ -217,61 +220,13 @@
  *                     $ref: '#/components/schemas/User'
  *                 token:
  *                   type: string
+ *       401:
+ *         description: Unauthorized Request
  *       400:
  *         description: Bad Request
  *       500:
  *         description: Internal server error
  */
-
-// /**
-//  * @swagger
-//  * /auth/signup:
-//  *   post:
-//  *     summary: Creates and authenticate a user
-//  *     tags: [Auth]
-//  *     security:
-//  *       - Authorization: []
-//  *     requestBody:
-//  *       required: true
-//  *       content:
-//  *         application/json:
-//  *           schema:
-//  *             type: object
-//  *             properties:
-//  *               email:
-//  *                 type: string
-//  *                 example: string
-//  *               name:
-//  *                 type: string
-//  *                 example: string
-//  *               password:
-//  *                  type: string
-//  *                  example: string
-//  *     responses:
-//  *       201:
-//  *         description: User created successfully
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: object
-//  *               properties:
-//  *                 statusCode:
-//  *                   type: integer
-//  *                   example: 201
-//  *                 message:
-//  *                   type: string
-//  *                   example: User created successfully
-//  *                 user:
-//  *                   type: array
-//  *                   items:
-//  *                     $ref: '#/components/schemas/User'
-//  *                 token:
-//  *                   type: string
-//  *       400:
-//  *         description: Bad Request
-//  *       500:
-//  *         description: Internal server error
-//  */
 
 /**
  * @swagger
@@ -318,68 +273,51 @@
  *                     $ref: '#/components/schemas/User'
  *                 token:
  *                   type: string
+ *       401:
+ *         description: Unauthorized Request
  *       400:
  *         description: Bad Request
  *       500:
  *         description: Internal server error
  */
 
-// /**
-//  * @swagger
-//  * /auth/google:
-//  *   get:
-//  *     summary: Login with Google
-//  *     tags: [Auth]
-//  *     responses:
-//  *       200:
-//  *         description: Google login response
-//  */
-
 import { Router } from "express";
 import {
-	validateEmailPayload,
-	validateSignInPayload,
-	passportAuthHandler,
+	validateEmail,
+	validateSignIn,
 	generateToken,
 	verifyUser,
 } from "../controllers/authController.js";
 import {
-	emailPayloadSchema,
-	signInPayloadSchema,
-	generateTokenPayloadSchema,
-	passwordSchema,
-} from "../utils/validations.js";
+	emailPayloadValidation,
+	signInPayloadValidation,
+	generateTokenPayloadValidation,
+	passwordPayloadValidation,
+} from "../middlewares/validations.js";
 import { verifyAuthorizationToken } from "../middlewares/guards.js";
 import { authRateLimiter } from "../middlewares/rate-limit.js";
+import { passportAuthHandler } from "../middlewares/authenticate.js";
 
 const authRouter = Router();
 
 authRouter.post(
 	"/generate",
 	authRateLimiter,
-	generateTokenPayloadSchema,
+	generateTokenPayloadValidation,
 	generateToken
 );
 
 authRouter.post(
 	"/email",
 	verifyAuthorizationToken,
-	emailPayloadSchema,
-	validateEmailPayload
+	emailPayloadValidation,
+	validateEmail
 );
-
-// authRouter.post(
-// 	"/signup",
-// 	verifyAuthorizationToken,
-// 	signUpPayloadSchema,
-// 	validateSignUpPayload,
-// 	passportAuthHandler("signup", 201)
-// );
 
 authRouter.post(
 	"/verify",
 	verifyAuthorizationToken,
-	passwordSchema,
+	passwordPayloadValidation,
 	verifyUser,
 	passportAuthHandler("signin", 200)
 );
@@ -387,75 +325,9 @@ authRouter.post(
 authRouter.post(
 	"/signin",
 	verifyAuthorizationToken,
-	signInPayloadSchema,
-	validateSignInPayload,
+	signInPayloadValidation,
+	validateSignIn,
 	passportAuthHandler("signin", 200)
 );
-
-// authRouter.get(
-// 	"/google",
-// 	passport.authenticate("google", { scope: ["profile"] })
-// );
-
-// authRouter.get(
-// 	"/google/callback",
-// 	passport.authenticate("google", { failureRedirect: "/login" }),
-// 	function (req, res) {
-// 		// Successful authentication, redirect home.
-// 		res.redirect("/");
-// 	}
-// );
-
-// authRouter.post("/google", async (req, res, next) => {
-// 	try {
-// 		const { id_token } = req.body;
-
-// 		if (!id_token) {
-// 			return next(new CustomBadRequestError("Missing Google ID token"));
-// 		}
-
-// 		const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-// 		const ticket = await client.verifyIdToken({
-// 			idToken: id_token,
-// 			audience: process.env.GOOGLE_CLIENT_ID,
-// 		});
-
-// 		const payload = ticket.getPayload();
-// 		const { sub: googleId, email, name, picture } = payload;
-
-// 		let user = await User.findOne({ googleId });
-
-// 		if (!user) {
-// 			// Create new user
-// 			user = new User({
-// 				googleId,
-// 				email,
-// 				name,
-// 				authProviders: ["google"],
-// 				avatar: picture, // optional
-// 			});
-// 			await user.save();
-// 		}
-
-// 		// Issue your own JWT
-// 		const token = jwt.sign(
-// 			{ user: { _id: user._id, email: user.email } },
-// 			process.env.JWT_SECRET,
-// 			{ expiresIn: "7d" }
-// 		);
-
-// 		const userObj = user.toObject();
-// 		delete userObj.password;
-
-// 		res.status(200).json({
-// 			statusCode: 200,
-// 			message: "Google sign-in successful",
-// 			user: { ...userObj, token },
-// 		});
-// 	} catch (err) {
-// 		next(err);
-// 	}
-// });
 
 export default authRouter;

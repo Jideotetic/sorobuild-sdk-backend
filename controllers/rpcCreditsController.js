@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import CustomBadRequestError from "../errors/customBadRequestError.js";
 import CustomNotFoundError from "../errors/customNotFoundError.js";
 import { User } from "../schemas/user.js";
-import { validationResult } from "express-validator";
 import { verifyRequestBody } from "../middlewares/guards.js";
 
 export async function getAccountRpcCredits(req, res, next) {

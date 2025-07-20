@@ -107,12 +107,12 @@ import {
 	getAccountRpcCredits,
 	buyRpcCredits,
 } from "../controllers/rpcCreditsController.js";
-import { rpcCreditsPayloadSchema } from "../utils/validations.js";
+import { rpcCreditsPayloadValidation } from "../middlewares/validations.js";
 
 const rpcCreditsRouter = Router();
 
 rpcCreditsRouter.get("/:accountId", getAccountRpcCredits);
 
-rpcCreditsRouter.put("/:accountId", rpcCreditsPayloadSchema, buyRpcCredits);
+rpcCreditsRouter.put("/:accountId", rpcCreditsPayloadValidation, buyRpcCredits);
 
 export default rpcCreditsRouter;

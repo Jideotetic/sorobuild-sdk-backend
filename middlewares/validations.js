@@ -1,7 +1,7 @@
 import { body } from "express-validator";
 import validator from "validator";
 
-export const emailPayloadSchema = [
+export const emailPayloadValidation = [
 	body("email")
 		.trim()
 		.notEmpty()
@@ -17,33 +17,7 @@ export const emailPayloadSchema = [
 		}),
 ];
 
-export const signUpPayloadSchema = [
-	body("email")
-		.trim()
-		.notEmpty()
-		.withMessage("Email is required")
-		.isEmail()
-		.withMessage("Email is invalid")
-		.custom((value) => {
-			const blockedEmails = ["string"];
-			if (blockedEmails.includes(value.toLowerCase())) {
-				throw new Error("Email is required");
-			}
-			return true;
-		}),
-
-	body("name")
-		.trim()
-		.notEmpty()
-		.withMessage("Name is required")
-		.custom((value) => {
-			const blockedName = ["string"];
-			if (blockedName.includes(value.toLowerCase())) {
-				throw new Error("Name is required");
-			}
-			return true;
-		}),
-
+export const passwordPayloadValidation = [
 	body("password")
 		.trim()
 		.notEmpty()
@@ -59,23 +33,7 @@ export const signUpPayloadSchema = [
 		}),
 ];
 
-export const passwordSchema = [
-	body("password")
-		.trim()
-		.notEmpty()
-		.withMessage("Password is required")
-		.isLength({ min: 6 })
-		.withMessage("Password must be at least 6 characters")
-		.custom((value) => {
-			const blockedPassword = ["string"];
-			if (blockedPassword.includes(value.toLowerCase())) {
-				throw new Error("Password is required");
-			}
-			return true;
-		}),
-];
-
-export const signInPayloadSchema = [
+export const signInPayloadValidation = [
 	body("email")
 		.trim()
 		.notEmpty()
@@ -105,7 +63,7 @@ export const signInPayloadSchema = [
 		}),
 ];
 
-export const generateTokenPayloadSchema = [
+export const generateTokenPayloadValidation = [
 	body("api_id")
 		.trim()
 		.notEmpty()
@@ -131,7 +89,7 @@ export const generateTokenPayloadSchema = [
 		}),
 ];
 
-export const createProjectSchema = [
+export const createProjectPayloadValidation = [
 	body("name").trim().notEmpty().withMessage("Name is required"),
 
 	body("whitelistedDomain")
@@ -147,7 +105,7 @@ export const createProjectSchema = [
 		}),
 ];
 
-export const updateProjectSchema = [
+export const updateProjectPayloadValidation = [
 	body("name")
 		.trim()
 		.notEmpty()
@@ -179,7 +137,7 @@ export const updateProjectSchema = [
 		.withMessage("devMode must be a boolean"),
 ];
 
-export const rpcCreditsPayloadSchema = [
+export const rpcCreditsPayloadValidation = [
 	body("rpcCredits")
 		.notEmpty()
 		.withMessage("rpcCredits is required")

@@ -331,9 +331,9 @@
 
 import { Router } from "express";
 import {
-	createProjectSchema,
-	updateProjectSchema,
-} from "../utils/validations.js";
+	createProjectPayloadValidation,
+	updateProjectPayloadValidation,
+} from "../middlewares/validations.js";
 import {
 	createProject,
 	deleteProject,
@@ -344,13 +344,21 @@ import {
 
 const projectRouter = Router();
 
-projectRouter.post("/:accountId", createProjectSchema, createProject);
+projectRouter.post(
+	"/:accountId",
+	createProjectPayloadValidation,
+	createProject
+);
 
 projectRouter.get("/", fetchAllProjects);
 
 projectRouter.get("/:accountId", fetchAllUserProjects);
 
-projectRouter.put("/:accountId/:projectId", updateProjectSchema, updateProject);
+projectRouter.put(
+	"/:accountId/:projectId",
+	updateProjectPayloadValidation,
+	updateProject
+);
 
 projectRouter.delete("/:accountId/:projectId", deleteProject);
 
