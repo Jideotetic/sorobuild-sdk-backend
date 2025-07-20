@@ -74,15 +74,27 @@ rpcHorizonRouter.post("/:api/:network", async (req, res) => {
 	const baseUrl = ENDPOINTS[api][network];
 
 	try {
-		const { data, status } = await axios.post(baseUrl, body, {
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
+		if (api === "rpc") {
+			const { data, status } = await axios.post(baseUrl, body, {
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
 
-		console.log({ status, data });
+			console.log({ status, data });
 
-		res.status(status).json(data);
+			res.status(status).json(data);
+		} else if (api === "horizon") {
+			const { data, status } = await axios.get(baseUrl, body, {
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+
+			console.log({ status, data });
+
+			res.status(status).json(data);
+		}
 	} catch (error) {
 		console.error(error.response?.data || error.message);
 		res.status(error.response?.status || 500).json({

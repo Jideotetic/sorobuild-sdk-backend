@@ -1,11 +1,7 @@
-import { validationResult } from "express-validator";
 import { User } from "../schemas/user.js";
 import { Project } from "../schemas/project.js";
 import CustomBadRequestError from "../errors/customBadRequestError.js";
-import passport from "passport";
-import { promisify } from "util";
 import jwt from "jsonwebtoken";
-import CustomNotFoundError from "../errors/customNotFoundError.js";
 import crypto from "crypto";
 import { sendOnboardingEmail } from "../services/emailService.js";
 import { verifyRequestBody } from "../middlewares/guards.js";
@@ -17,9 +13,7 @@ export const generateToken = async (req, res, next) => {
 		const { api_id, api_key } = req.body;
 
 		if (api_id !== process.env.API_ID || api_key !== process.env.API_KEY) {
-			throw new CustomBadRequestError(
-				JSON.stringify("Invalid api credentials")
-			);
+			throw new CustomBadRequestError("Invalid api credentials");
 		}
 
 		const token = jwt.sign(
@@ -41,7 +35,7 @@ export const generateToken = async (req, res, next) => {
 	}
 };
 
-export async function validateEmailPayload(req, res, next) {
+export async function validateEmail(req, res, next) {
 	try {
 		verifyRequestBody(req);
 
@@ -104,9 +98,7 @@ export async function verifyUser(req, res, next) {
 		const { password } = req.body;
 
 		if (!verificationToken) {
-			throw new CustomBadRequestError(
-				JSON.stringify("Verification token is missing.")
-			);
+			throw new CustomBadRequestError("Verification token is missing.");
 		}
 
 		const user = await User.findOne({ verificationToken });
@@ -114,9 +106,7 @@ export async function verifyUser(req, res, next) {
 		user;
 
 		if (!user) {
-			throw new CustomBadRequestError(
-				JSON.stringify("Invalid or expired verification token.")
-			);
+			throw new CustomBadRequestError("Invalid or expired verification token.");
 		}
 
 		user.isVerified = true;
@@ -144,17 +134,7 @@ export async function verifyUser(req, res, next) {
 	}
 }
 
-export async function validateSignUpPayload(req, res, next) {
-	try {
-		verifyRequestBody(req);
-		next();
-	} catch (error) {
-		console.error(error);
-		return next(error);
-	}
-}
-
-export async function validateSignInPayload(req, res, next) {
+export async function validateSignIn(req, res, next) {
 	try {
 		verifyRequestBody(req);
 
@@ -163,59 +143,4 @@ export async function validateSignInPayload(req, res, next) {
 		console.error(error);
 		return next(error);
 	}
-}
-
-export async function handleAuthCallback(
-	req,
-	res,
-	next,
-	err,
-	user,
-	info,
-	statusCode
-) {
-	if (err || !user) {
-		const message = info.message || "Authentication failed";
-		if (message === "No user found ...Kindly sign up") {
-			return next(new CustomNotFoundError(message));
-		} else if (
-			message === "Wrong password" ||
-			message === "User already exist...Kindly sign in"
-		) {
-			return next(new CustomBadRequestError(JSON.stringify(message)));
-		} else {
-			return next(new CustomBadRequestError(JSON.stringify(message)));
-		}
-	}
-
-	try {
-		await promisify(req.login).bind(req)(user, { session: false });
-
-		const JWT_SECRET = process.env.JWT_SECRET;
-
-		const body = { ...user };
-		const token = jwt.sign({ user: body }, JWT_SECRET, {
-			expiresIn: "24h",
-		});
-
-		const userObj = user.toObject();
-		delete userObj.password;
-
-		return res.status(statusCode).json({
-			statusCode,
-			message: info?.message || "Success",
-			user: { ...userObj, token },
-		});
-	} catch (error) {
-		return next(error);
-	}
-}
-
-export function passportAuthHandler(strategyName, statusCode) {
-	return (req, res, next) => {
-		// Calls the passport middleware for sign up /middlewares/passport.js
-		passport.authenticate(strategyName, (err, user, info) => {
-			handleAuthCallback(req, res, next, err, user, info, statusCode);
-		})(req, res, next);
-	};
 }

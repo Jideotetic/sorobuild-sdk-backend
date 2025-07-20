@@ -1,9 +1,9 @@
-import { validationResult } from "express-validator";
 import CustomBadRequestError from "../errors/customBadRequestError.js";
 import { User } from "../schemas/user.js";
 import { Project } from "../schemas/project.js";
 import CustomNotFoundError from "../errors/customNotFoundError.js";
 import mongoose from "mongoose";
+import { verifyRequestBody } from "../middlewares/guards.js";
 
 export async function createProject(req, res, next) {
 	try {
@@ -13,25 +13,23 @@ export async function createProject(req, res, next) {
 		const { accountId: _id } = req.params;
 
 		if (!_id) {
-			throw new CustomBadRequestError(JSON.stringify("Account ID missing"));
+			throw new CustomBadRequestError("Account ID missing");
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError(JSON.stringify("Invalid accountId"));
+			throw new CustomBadRequestError("Invalid accountId");
 		}
 
 		const user = await User.findOne({ _id });
 
 		if (!user) {
 			throw new CustomBadRequestError(
-				JSON.stringify("User not found with the provided account ID")
+				"User not found with the provided account ID"
 			);
 		}
 
 		if (user.projects.length >= user.projectLimit) {
-			throw new CustomBadRequestError(
-				JSON.stringify("Project limit reached for this account")
-			);
+			throw new CustomBadRequestError("Project limit reached for this account");
 		}
 
 		const newProject = new Project({
@@ -62,11 +60,11 @@ export async function fetchAllUserProjects(req, res, next) {
 		const { accountId: _id } = req.params;
 
 		if (!_id) {
-			throw new CustomBadRequestError(JSON.stringify("Account ID missing"));
+			throw new CustomBadRequestError("Account ID missing");
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError(JSON.stringify("Invalid accountId"));
+			throw new CustomBadRequestError("Invalid accountId");
 		}
 
 		const user = await User.findOne({ _id }).populate("projects");
@@ -96,19 +94,15 @@ export async function updateProject(req, res, next) {
 		const { accountId: _id, projectId } = req.params;
 
 		if (!_id || !projectId) {
-			throw new CustomBadRequestError(
-				JSON.stringify("Account ID or Project ID missing")
-			);
+			throw new CustomBadRequestError("Account ID or Project ID missing");
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError(JSON.stringify("Invalid accountId"));
+			throw new CustomBadRequestError("Invalid accountId");
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(projectId)) {
-			throw new CustomBadRequestError(
-				JSON.stringify("Invalid projectId format")
-			);
+			throw new CustomBadRequestError("Invalid projectId format");
 		}
 
 		const user = await User.findOne({ _id });
