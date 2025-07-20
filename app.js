@@ -1,15 +1,25 @@
 import express from "express";
+import cors from "cors";
+
 import swaggerUi from "swagger-ui-express";
 import { specs } from "./utils/swagger.js";
-import authRouter from "./routes/auth-route/authRouter.js";
+
 import { connectToMongoDB } from "./model/db.js";
-import cors from "cors";
-import projectRouter from "./routes/project-route/projectRouter.js";
-import "./middlewares/passport.js";
+
+import authRouter from "./routes/authRouter.js";
+import projectRouter from "./routes/projectRouter.js";
+import rpcHorizonRouter from "./routes/rpcHorizonRouter.js";
+import rpcCreditsRouter from "./routes/rpcCreditsRouter.js";
+
 import CustomBadRequestError from "./errors/customBadRequestError.js";
-import rpcCreditsRouter from "./routes/rpc-credits-route/rpcCreditsRouter.js";
-import { authenticateAppUser, authenticateUser } from "./middlewares/guards.js";
-import rpcHorizonRouter from "./routes/rpc-horizon-route/rpcHorizonRouter.js";
+import CustomNotFoundError from "./errors/customNotFoundError.js";
+
+import {
+	verifyAuthorizationToken,
+	verifyIdToken,
+} from "./middlewares/guards.js";
+
+import "./middlewares/passport.js";
 
 const app = express();
 
@@ -19,11 +29,11 @@ const allowedOrigins = [
 	"https://soro.build",
 	"http://localhost:5173",
 	"http://localhost:3000",
+	"https://base-testnet-horizon.soro.build",
 ];
 
 const corsOptions = {
 	origin: function (origin, callback) {
-		// // Allow requests with no origin (like curl or mobile apps)
 		if (!origin) return callback(null, true);
 		if (allowedOrigins.includes(origin)) {
 			callback(null, true);
@@ -41,35 +51,40 @@ app.use(express.urlencoded({ extended: true }));
 
 const port = process.env.PORT || 3000;
 
-app.use(
-	"/api-docs",
-	swaggerUi.serve,
-	swaggerUi.setup(specs, {
-		// explorer: true,
-		// customCssUrl:
-		// 	"https://cdn.jsdelivr.net/npm/swagger-ui-themes@3.0.0/themes/3.x/theme-newspaper.css",
-	})
-);
+// Swagger docs
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
+// API endpoints
 app.use("/auth", authRouter);
-app.use("/project", authenticateAppUser, authenticateUser, projectRouter);
+app.use("/project", verifyAuthorizationToken, verifyIdToken, projectRouter);
 app.use(
 	"/rpc-credits",
-	authenticateAppUser,
-	authenticateUser,
+	verifyAuthorizationToken,
+	verifyIdToken,
 	rpcCreditsRouter
 );
-app.use("/rpc-horizon", rpcHorizonRouter);
+app.use(
+	"/rpc-horizon",
+	// verifyAuthorizationToken,
+	// verifyIdToken,
+	rpcHorizonRouter
+);
 
-app.all("/", authenticateAppUser, authenticateUser, (req, res, next) => {
-	const error = new CustomBadRequestError(`Route ${req.originalUrl} not found`);
+// Catch all route
+app.all("/", verifyAuthorizationToken, verifyIdToken, (req, res, next) => {
+	const error = new CustomNotFoundError(`Route ${req.originalUrl} not found`);
 	next(error);
 });
 
-app.all("/*splat", authenticateAppUser, authenticateUser, (req, res, next) => {
-	const error = new CustomBadRequestError(`Route ${req.originalUrl} not found`);
-	next(error);
-});
+app.all(
+	"/*splat",
+	verifyAuthorizationToken,
+	verifyIdToken,
+	(req, res, next) => {
+		const error = new CustomNotFoundError(`Route ${req.originalUrl} not found`);
+		next(error);
+	}
+);
 
 // Error handlers
 app.use((err, req, res, next) => {

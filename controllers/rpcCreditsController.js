@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
-import CustomBadRequestError from "../../errors/customBadRequestError.js";
-import CustomNotFoundError from "../../errors/customNotFoundError.js";
-import { User } from "../../schemas/user.js";
+import CustomBadRequestError from "../errors/customBadRequestError.js";
+import CustomNotFoundError from "../errors/customNotFoundError.js";
+import { User } from "../schemas/user.js";
 import { validationResult } from "express-validator";
+import { verifyRequestBody } from "../middlewares/guards.js";
 
 export async function getAccountRpcCredits(req, res, next) {
 	try {
@@ -20,7 +21,7 @@ export async function getAccountRpcCredits(req, res, next) {
 
 		if (!user) {
 			throw new CustomNotFoundError(
-				JSON.stringify("User not found with the provided account ID")
+				"User not found with the provided account ID"
 			);
 		}
 
@@ -36,11 +37,8 @@ export async function getAccountRpcCredits(req, res, next) {
 }
 
 export async function buyRpcCredits(req, res, next) {
-	const errors = validationResult(req);
 	try {
-		if (!errors.isEmpty()) {
-			throw new CustomBadRequestError(JSON.stringify(errors.array()));
-		}
+		verifyRequestBody(req);
 
 		const { accountId: _id } = req.params;
 
@@ -56,7 +54,7 @@ export async function buyRpcCredits(req, res, next) {
 
 		if (!user) {
 			throw new CustomNotFoundError(
-				JSON.stringify("User not found with the provided account ID")
+				"User not found with the provided account ID"
 			);
 		}
 

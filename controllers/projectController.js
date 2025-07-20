@@ -1,17 +1,13 @@
 import { validationResult } from "express-validator";
-import CustomBadRequestError from "../../errors/customBadRequestError.js";
-import { User } from "../../schemas/user.js";
-import { Project } from "../../schemas/project.js";
-import CustomNotFoundError from "../../errors/customNotFoundError.js";
+import CustomBadRequestError from "../errors/customBadRequestError.js";
+import { User } from "../schemas/user.js";
+import { Project } from "../schemas/project.js";
+import CustomNotFoundError from "../errors/customNotFoundError.js";
 import mongoose from "mongoose";
 
 export async function createProject(req, res, next) {
-	const errors = validationResult(req);
-
 	try {
-		if (!errors.isEmpty()) {
-			throw new CustomBadRequestError(JSON.stringify(errors.array()));
-		}
+		verifyRequestBody(req);
 
 		const { name, whitelistedDomain } = req.body;
 		const { accountId: _id } = req.params;
@@ -21,9 +17,7 @@ export async function createProject(req, res, next) {
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError(
-				JSON.stringify("Invalid accountId")
-			);
+			throw new CustomBadRequestError(JSON.stringify("Invalid accountId"));
 		}
 
 		const user = await User.findOne({ _id });
@@ -72,16 +66,14 @@ export async function fetchAllUserProjects(req, res, next) {
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError(
-				JSON.stringify("Invalid accountId")
-			);
+			throw new CustomBadRequestError(JSON.stringify("Invalid accountId"));
 		}
 
 		const user = await User.findOne({ _id }).populate("projects");
 
 		if (!user) {
 			throw new CustomNotFoundError(
-				JSON.stringify("User not found with the provided account ID")
+				"User not found with the provided account ID"
 			);
 		}
 
@@ -97,12 +89,8 @@ export async function fetchAllUserProjects(req, res, next) {
 }
 
 export async function updateProject(req, res, next) {
-	const errors = validationResult(req);
-
 	try {
-		if (!errors.isEmpty()) {
-			throw new CustomBadRequestError(JSON.stringify(errors.array()));
-		}
+		verifyRequestBody(req);
 
 		const { name, devMode, whitelistedDomain } = req.body;
 		const { accountId: _id, projectId } = req.params;
@@ -114,9 +102,7 @@ export async function updateProject(req, res, next) {
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError(
-				JSON.stringify("Invalid accountId")
-			);
+			throw new CustomBadRequestError(JSON.stringify("Invalid accountId"));
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(projectId)) {
@@ -129,7 +115,7 @@ export async function updateProject(req, res, next) {
 
 		if (!user) {
 			throw new CustomNotFoundError(
-				JSON.stringify("User not found with the provided account ID")
+				"User not found with the provided account ID"
 			);
 		}
 
@@ -146,7 +132,7 @@ export async function updateProject(req, res, next) {
 
 		if (!updatedProject) {
 			throw new CustomNotFoundError(
-				JSON.stringify("Project not found or could not be updated")
+				"Project not found or could not be updated"
 			);
 		}
 
@@ -172,9 +158,7 @@ export async function deleteProject(req, res, next) {
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError(
-				JSON.stringify("Invalid accountId")
-			);
+			throw new CustomBadRequestError(JSON.stringify("Invalid accountId"));
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(projectId)) {
@@ -187,7 +171,7 @@ export async function deleteProject(req, res, next) {
 
 		if (!user) {
 			throw new CustomNotFoundError(
-				JSON.stringify("User not found with the provided account ID")
+				"User not found with the provided account ID"
 			);
 		}
 

@@ -1,21 +1,18 @@
 import { validationResult } from "express-validator";
-import { User } from "../../schemas/user.js";
-import { Project } from "../../schemas/project.js";
-import CustomBadRequestError from "../../errors/customBadRequestError.js";
+import { User } from "../schemas/user.js";
+import { Project } from "../schemas/project.js";
+import CustomBadRequestError from "../errors/customBadRequestError.js";
 import passport from "passport";
 import { promisify } from "util";
 import jwt from "jsonwebtoken";
-import CustomNotFoundError from "../../errors/customNotFoundError.js";
+import CustomNotFoundError from "../errors/customNotFoundError.js";
 import crypto from "crypto";
-import { sendOnboardingEmail } from "../../services/emailService.js";
+import { sendOnboardingEmail } from "../services/emailService.js";
+import { verifyRequestBody } from "../middlewares/guards.js";
 
 export const generateToken = async (req, res, next) => {
-	const errors = validationResult(req);
-
 	try {
-		if (!errors.isEmpty()) {
-			throw new CustomBadRequestError(JSON.stringify(errors.array()));
-		}
+		verifyRequestBody(req);
 
 		const { api_id, api_key } = req.body;
 
@@ -45,12 +42,8 @@ export const generateToken = async (req, res, next) => {
 };
 
 export async function validateEmailPayload(req, res, next) {
-	const errors = validationResult(req);
-
 	try {
-		if (!errors.isEmpty()) {
-			throw new CustomBadRequestError(JSON.stringify(errors.array()));
-		}
+		verifyRequestBody(req);
 
 		const { email } = req.body;
 
@@ -104,11 +97,8 @@ export async function validateEmailPayload(req, res, next) {
 }
 
 export async function verifyUser(req, res, next) {
-	const errors = validationResult(req);
 	try {
-		if (!errors.isEmpty()) {
-			throw new CustomBadRequestError(JSON.stringify(errors.array()));
-		}
+		verifyRequestBody(req);
 
 		const { verificationToken } = req.query;
 		const { password } = req.body;
@@ -155,13 +145,8 @@ export async function verifyUser(req, res, next) {
 }
 
 export async function validateSignUpPayload(req, res, next) {
-	const errors = validationResult(req);
-
 	try {
-		if (!errors.isEmpty()) {
-			throw new CustomBadRequestError(JSON.stringify(errors.array()));
-		}
-
+		verifyRequestBody(req);
 		next();
 	} catch (error) {
 		console.error(error);
@@ -170,12 +155,8 @@ export async function validateSignUpPayload(req, res, next) {
 }
 
 export async function validateSignInPayload(req, res, next) {
-	const errors = validationResult(req);
-
 	try {
-		if (!errors.isEmpty()) {
-			throw new CustomBadRequestError(JSON.stringify(errors.array()));
-		}
+		verifyRequestBody(req);
 
 		next();
 	} catch (error) {
@@ -196,7 +177,7 @@ export async function handleAuthCallback(
 	if (err || !user) {
 		const message = info.message || "Authentication failed";
 		if (message === "No user found ...Kindly sign up") {
-			return next(new CustomNotFoundError(JSON.stringify(message)));
+			return next(new CustomNotFoundError(message));
 		} else if (
 			message === "Wrong password" ||
 			message === "User already exist...Kindly sign in"

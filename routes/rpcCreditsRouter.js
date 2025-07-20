@@ -106,8 +106,8 @@ import { Router } from "express";
 import {
 	getAccountRpcCredits,
 	buyRpcCredits,
-} from "../../controllers/rpc-credits-controller/rpcCreditsController.js";
-import { rpcCreditsPayloadSchema } from "../../utils/validations.js";
+} from "../controllers/rpcCreditsController.js";
+import { rpcCreditsPayloadSchema } from "../utils/validations.js";
 
 const rpcCreditsRouter = Router();
 
