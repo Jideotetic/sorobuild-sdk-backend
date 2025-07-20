@@ -29,7 +29,7 @@ const allowedOrigins = [
 	"https://soro.build",
 	"http://localhost:5173",
 	"http://localhost:3000",
-	"https://base-testnet-horizon.soro.build",
+	"https://sorobuild-sdk-backend.onrender.com",
 ];
 
 const corsOptions = {
