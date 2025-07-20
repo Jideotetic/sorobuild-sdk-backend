@@ -2,13 +2,9 @@ import passport from "passport";
 import CustomUnauthorizedError from "../errors/customUnauthorizedError.js";
 import { validationResult } from "express-validator";
 import CustomBadRequestError from "../errors/customBadRequestError.js";
-
-const trustedClients = ["https://soro.build", "http://localhost:5173"];
-
-function isTrustedClient(req) {
-	const origin = req.headers.origin;
-	return trustedClients.includes(origin);
-}
+import { isTrustedClient } from "./clients.js";
+import { isTokenBlacklisted } from "./blackListToken.js";
+import { extractIdToken } from "../utils/lib.js";
 
 export const verifyAuthorizationToken = (req, res, next) => {
 	if (isTrustedClient(req)) {
@@ -22,7 +18,10 @@ export const verifyAuthorizationToken = (req, res, next) => {
 				return next(
 					new CustomUnauthorizedError("No Authorization token present")
 				);
-			} else if (message === "invalid signature") {
+			} else if (
+				message === "invalid signature" ||
+				message === "jwt malformed"
+			) {
 				return next(new CustomUnauthorizedError("Invalid Authorization token"));
 			} else {
 				return next(new CustomUnauthorizedError(message));
@@ -34,20 +33,36 @@ export const verifyAuthorizationToken = (req, res, next) => {
 };
 
 export const verifyIdToken = (req, res, next) => {
-	passport.authenticate("id-jwt", { session: false }, (err, user, info) => {
-		if (err || !user) {
-			const message = info?.message;
-			if (message === "No auth token") {
-				return next(new CustomUnauthorizedError("No idToken token present"));
-			} else if (message === "invalid signature") {
-				return next(new CustomUnauthorizedError("Invalid idToken"));
-			} else {
-				return next(new CustomUnauthorizedError(message));
+	passport.authenticate(
+		"id-jwt",
+		{ session: false },
+		async (err, user, info) => {
+			if (err || !user) {
+				const message = info?.message;
+				if (message === "No auth token") {
+					return next(new CustomUnauthorizedError("No idToken token present"));
+				} else if (
+					message === "invalid signature" ||
+					message === "jwt malformed"
+				) {
+					return next(new CustomUnauthorizedError("Invalid idToken"));
+				} else {
+					return next(new CustomUnauthorizedError(message));
+				}
 			}
+
+			const token = extractIdToken(req);
+
+			const blacklisted = await isTokenBlacklisted(token);
+			if (blacklisted) {
+				return next(new CustomUnauthorizedError("Invalid idToken"));
+			}
+
+			req.user = user;
+			req.token = token;
+			next();
 		}
-		req.user = user;
-		next();
-	})(req, res, next);
+	)(req, res, next);
 };
 
 export const verifyRequestBody = (req) => {

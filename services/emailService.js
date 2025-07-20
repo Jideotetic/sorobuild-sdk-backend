@@ -23,11 +23,9 @@ export async function sendOnboardingEmail(email, token) {
 			`,
 		});
 
-		// ✅ Log success
 		console.log(`✅ Email successfully sent to ${email}`);
 		console.log(`📬 Response: ${info.response}`);
 	} catch (error) {
-		// ❌ Log failure
 		console.error(`❌ Failed to send email to ${email}`);
 		console.error(error);
 		throw error;

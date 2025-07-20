@@ -168,7 +168,8 @@
  *                 nextAction:
  *                   type: string
  *                   enum:
- *                     - ONBOARD_NEW_USER
+ *                     - COMPLETE_PREVIOUS_EMAIL_VERIFICATION
+ *                     - COMPLETE_EMAIL_VERIFICATION
  *                     - REQUEST_PASSWORD
  *                   example: REQUEST_PASSWORD
  *       401:
@@ -281,12 +282,48 @@
  *         description: Internal server error
  */
 
+/**
+ * @swagger
+ * /auth/signout:
+ *   post:
+ *     summary: Sign out a user
+ *     tags: [Auth]
+ *     security:
+ *       - Authorization: []
+ *     parameters:
+ *       - in: header
+ *         name: idToken
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID token
+ *     responses:
+ *       200:
+ *         description: User signed out successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: User signed out successfully
+ *       401:
+ *         description: Unauthorized Request
+ *       500:
+ *         description: Internal server error
+ */
+
 import { Router } from "express";
 import {
 	validateEmail,
 	validateSignIn,
-	generateToken,
+	generateAuthorizationToken,
 	verifyUser,
+	signout,
 } from "../controllers/authController.js";
 import {
 	emailPayloadValidation,
@@ -294,8 +331,11 @@ import {
 	generateTokenPayloadValidation,
 	passwordPayloadValidation,
 } from "../middlewares/validations.js";
-import { verifyAuthorizationToken } from "../middlewares/guards.js";
-import { authRateLimiter } from "../middlewares/rate-limit.js";
+import {
+	verifyAuthorizationToken,
+	verifyIdToken,
+} from "../middlewares/guards.js";
+import { authRateLimiter } from "../middlewares/rateLimit.js";
 import { passportAuthHandler } from "../middlewares/authenticate.js";
 
 const authRouter = Router();
@@ -304,7 +344,7 @@ authRouter.post(
 	"/generate",
 	authRateLimiter,
 	generateTokenPayloadValidation,
-	generateToken
+	generateAuthorizationToken
 );
 
 authRouter.post(
@@ -329,5 +369,7 @@ authRouter.post(
 	validateSignIn,
 	passportAuthHandler("signin", 200)
 );
+
+authRouter.post("/signout", verifyAuthorizationToken, verifyIdToken, signout);
 
 export default authRouter;

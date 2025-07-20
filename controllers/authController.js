@@ -2,11 +2,12 @@ import { User } from "../schemas/user.js";
 import { Project } from "../schemas/project.js";
 import CustomBadRequestError from "../errors/customBadRequestError.js";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import { sendOnboardingEmail } from "../services/emailService.js";
 import { verifyRequestBody } from "../middlewares/guards.js";
+import { generateVerificationToken } from "../utils/lib.js";
+import { blacklistToken } from "../middlewares/blackListToken.js";
 
-export const generateToken = async (req, res, next) => {
+export const generateAuthorizationToken = async (req, res, next) => {
 	try {
 		verifyRequestBody(req);
 
@@ -60,13 +61,11 @@ export async function validateEmail(req, res, next) {
 					"User exist, Check the previous email that was sent to complete registration.",
 				email: email,
 				userExists: true,
-				nextAction: "COMPLETE_EMAIL_VERIFICATION",
+				nextAction: "COMPLETE_PREVIOUS_EMAIL_VERIFICATION",
 			});
 		}
 
-		const hash = crypto.createHash("sha256");
-		hash.update(email + crypto.randomBytes(32).toString("hex"));
-		const verificationToken = hash.digest("hex");
+		const verificationToken = generateVerificationToken(email);
 
 		const newUser = new User({
 			email,
@@ -103,8 +102,6 @@ export async function verifyUser(req, res, next) {
 
 		const user = await User.findOne({ verificationToken });
 
-		user;
-
 		if (!user) {
 			throw new CustomBadRequestError("Invalid or expired verification token.");
 		}
@@ -139,6 +136,30 @@ export async function validateSignIn(req, res, next) {
 		verifyRequestBody(req);
 
 		next();
+	} catch (error) {
+		console.error(error);
+		return next(error);
+	}
+}
+
+export async function signout(req, res) {
+	try {
+		// Blacklist token
+		const token = req.token;
+		const decoded = jwt.decode(token);
+		const exp = decoded.exp;
+
+		const now = Math.floor(Date.now() / 1000);
+		const ttl = exp - now;
+
+		if (ttl > 0) {
+			await blacklistToken(token, ttl);
+		}
+
+		res.status(200).json({
+			statusCode: 200,
+			message: "User signed out successfully",
+		});
 	} catch (error) {
 		console.error(error);
 		return next(error);

@@ -25,6 +25,7 @@ const app = express();
 
 await connectToMongoDB();
 
+// Cors stuff
 const allowedOrigins = [
 	"https://soro.build",
 	"http://localhost:5173",
@@ -32,8 +33,6 @@ const allowedOrigins = [
 	"https://sorobuild-sdk-backend.onrender.com",
 ];
 
-
-// Cors stuff
 const corsOptions = {
 	origin: function (origin, callback) {
 		if (!origin) return callback(null, true);
@@ -66,7 +65,7 @@ app.use(
 	rpcCreditsRouter
 );
 app.use(
-	"/rpc-horizon",
+	"/service",
 	// verifyAuthorizationToken,
 	// verifyIdToken,
 	rpcHorizonRouter
