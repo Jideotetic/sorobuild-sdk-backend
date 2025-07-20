@@ -8,8 +8,9 @@ import { connectToMongoDB } from "./model/db.js";
 
 import authRouter from "./routes/authRouter.js";
 import projectRouter from "./routes/projectRouter.js";
-import rpcHorizonRouter from "./routes/rpcHorizonRouter.js";
 import rpcCreditsRouter from "./routes/rpcCreditsRouter.js";
+import rpcRouter from "./routes/rpcRouter.js";
+import horizonRouter from "./routes/horizonRouter.js";
 
 import CustomBadRequestError from "./errors/customBadRequestError.js";
 import CustomNotFoundError from "./errors/customNotFoundError.js";
@@ -64,11 +65,26 @@ app.use(
 	verifyIdToken,
 	rpcCreditsRouter
 );
+
+// app.use(
+// 	"/service",
+// 	// verifyAuthorizationToken,
+// 	// verifyIdToken,
+// 	rpcHorizonRouter
+// );
+
 app.use(
-	"/service",
+	"/rpc",
 	// verifyAuthorizationToken,
 	// verifyIdToken,
-	rpcHorizonRouter
+	rpcRouter
+);
+
+app.use(
+	"/horizon",
+	// verifyAuthorizationToken,
+	// verifyIdToken,
+	horizonRouter
 );
 
 // Catch all route
