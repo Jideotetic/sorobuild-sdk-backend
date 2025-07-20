@@ -7,7 +7,7 @@
 
 /**
  * @swagger
- * /rpc-horizon/{api}/{network}:
+ * /service/{api}/{network}:
  *   post:
  *     summary: Make a request to rpc or horizon
  *     tags: [RPC Horizons]

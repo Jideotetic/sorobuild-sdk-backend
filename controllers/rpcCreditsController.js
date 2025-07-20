@@ -9,11 +9,11 @@ export async function getAccountRpcCredits(req, res, next) {
 		const { accountId: _id } = req.params;
 
 		if (!_id) {
-			throw new CustomBadRequestError(JSON.stringify("Account ID missing"));
+			throw new CustomBadRequestError("Account ID missing");
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError(JSON.stringify("Invalid accountId"));
+			throw new CustomBadRequestError("Invalid accountId");
 		}
 
 		const user = await User.findOne({ _id });
@@ -42,11 +42,11 @@ export async function buyRpcCredits(req, res, next) {
 		const { accountId: _id } = req.params;
 
 		if (!_id) {
-			throw new CustomBadRequestError(JSON.stringify("Account ID missing"));
+			throw new CustomBadRequestError("Account ID missing");
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError(JSON.stringify("Invalid accountId"));
+			throw new CustomBadRequestError("Invalid accountId");
 		}
 
 		const user = await User.findOne({ _id });

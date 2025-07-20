@@ -2,6 +2,7 @@ import passport from "passport";
 import { promisify } from "util";
 import CustomNotFoundError from "../errors/customNotFoundError.js";
 import CustomBadRequestError from "../errors/customBadRequestError.js";
+import jwt from "jsonwebtoken";
 
 export async function handleAuthCallback(
 	req,

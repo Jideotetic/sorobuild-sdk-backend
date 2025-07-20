@@ -115,7 +115,7 @@ export async function updateProject(req, res, next) {
 
 		if (!user.projects.includes(projectId)) {
 			throw new CustomBadRequestError(
-				JSON.stringify("This project does not belong to the user")
+				"This project does not belong to the user"
 			);
 		}
 		const updatedProject = await Project.findOneAndUpdate(
@@ -146,19 +146,15 @@ export async function deleteProject(req, res, next) {
 		const { accountId: _id, projectId } = req.params;
 
 		if (!_id || !projectId) {
-			throw new CustomBadRequestError(
-				JSON.stringify("Account ID or Project ID missing")
-			);
+			throw new CustomBadRequestError("Account ID or Project ID missing");
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError(JSON.stringify("Invalid accountId"));
+			throw new CustomBadRequestError("Invalid accountId");
 		}
 
 		if (!mongoose.Types.ObjectId.isValid(projectId)) {
-			throw new CustomBadRequestError(
-				JSON.stringify("Invalid projectId format")
-			);
+			throw new CustomBadRequestError("Invalid projectId format");
 		}
 
 		const user = await User.findOne({ _id });
@@ -171,7 +167,7 @@ export async function deleteProject(req, res, next) {
 
 		if (!user.projects.includes(projectId)) {
 			throw new CustomBadRequestError(
-				JSON.stringify("This project does not belong to the user")
+				"This project does not belong to the user"
 			);
 		}
 
