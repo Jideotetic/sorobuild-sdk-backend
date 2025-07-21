@@ -88,20 +88,20 @@ app.use(
 );
 
 // Catch all route
-// app.all("/", verifyAuthorizationToken, verifyIdToken, (req, res, next) => {
-// 	const error = new CustomNotFoundError(`Route ${req.originalUrl} not found`);
-// 	next(error);
-// });
+app.all("/", verifyAuthorizationToken, verifyIdToken, (req, res, next) => {
+	const error = new CustomNotFoundError(`Route ${req.originalUrl} not found`);
+	next(error);
+});
 
-// app.all(
-// 	"/*splat",
-// 	verifyAuthorizationToken,
-// 	verifyIdToken,
-// 	(req, res, next) => {
-// 		const error = new CustomNotFoundError(`Route ${req.originalUrl} not found`);
-// 		next(error);
-// 	}
-// );
+app.all(
+	"/*splat",
+	verifyAuthorizationToken,
+	verifyIdToken,
+	(req, res, next) => {
+		const error = new CustomNotFoundError(`Route ${req.originalUrl} not found`);
+		next(error);
+	}
+);
 
 // Error handlers
 app.use((err, req, res, next) => {

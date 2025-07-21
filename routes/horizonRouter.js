@@ -61,13 +61,6 @@ horizonRouter.get(
 		const { network, primaryResource, secondaryResource, tertiaryResource } =
 			req.params;
 
-		console.log({
-			network,
-			primaryResource,
-			secondaryResource,
-			tertiaryResource,
-		});
-
 		const baseUrl = ENDPOINTS[network];
 
 		if (!baseUrl) {
