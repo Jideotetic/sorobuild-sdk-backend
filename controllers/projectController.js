@@ -4,7 +4,11 @@ import { Project } from "../schemas/project.js";
 import CustomNotFoundError from "../errors/customNotFoundError.js";
 import mongoose from "mongoose";
 import { verifyRequestBody } from "../middlewares/guards.js";
-import { findUser } from "../utils/lib.js";
+import {
+	findUser,
+	findUserByProjectId,
+	findUserProjects,
+} from "../utils/lib.js";
 
 export async function createProject(req, res, next) {
 	try {
@@ -13,7 +17,7 @@ export async function createProject(req, res, next) {
 		const { name, whitelistedDomain } = req.body;
 		const { accountId: _id } = req.params;
 
-		const user = findUser(_id);
+		const user = await findUser(_id);
 
 		if (user.projects.length >= user.projectLimit) {
 			throw new CustomBadRequestError("Project limit reached for this account");
@@ -46,21 +50,7 @@ export async function fetchAllUserProjects(req, res, next) {
 	try {
 		const { accountId: _id } = req.params;
 
-		if (!_id) {
-			throw new CustomBadRequestError("Account ID missing");
-		}
-
-		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError("Invalid accountId");
-		}
-
-		const user = await User.findOne({ _id }).populate("projects");
-
-		if (!user) {
-			throw new CustomNotFoundError(
-				"User not found with the provided account ID"
-			);
-		}
+		const user = await findUserProjects(_id);
 
 		res.status(200).json({
 			statusCode: 200,
@@ -80,34 +70,11 @@ export async function updateProject(req, res, next) {
 		const { name, devMode, whitelistedDomain } = req.body;
 		const { accountId: _id, projectId } = req.params;
 
-		if (!_id || !projectId) {
-			throw new CustomBadRequestError("Account ID or Project ID missing");
-		}
+		const user = await findUserByProjectId(_id, projectId);
 
-		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError("Invalid accountId");
-		}
-
-		if (!mongoose.Types.ObjectId.isValid(projectId)) {
-			throw new CustomBadRequestError("Invalid projectId format");
-		}
-
-		const user = await User.findOne({ _id });
-
-		if (!user) {
-			throw new CustomNotFoundError(
-				"User not found with the provided account ID"
-			);
-		}
-
-		if (!user.projects.includes(projectId)) {
-			throw new CustomBadRequestError(
-				"This project does not belong to the user"
-			);
-		}
 		const updatedProject = await Project.findOneAndUpdate(
 			{ _id: projectId, owner: user._id },
-			{ name, devMode },
+			{ name, devMode, whitelistedDomain },
 			{ new: true }
 		);
 
@@ -132,31 +99,7 @@ export async function deleteProject(req, res, next) {
 	try {
 		const { accountId: _id, projectId } = req.params;
 
-		if (!_id || !projectId) {
-			throw new CustomBadRequestError("Account ID or Project ID missing");
-		}
-
-		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError("Invalid accountId");
-		}
-
-		if (!mongoose.Types.ObjectId.isValid(projectId)) {
-			throw new CustomBadRequestError("Invalid projectId format");
-		}
-
-		const user = await User.findOne({ _id });
-
-		if (!user) {
-			throw new CustomNotFoundError(
-				"User not found with the provided account ID"
-			);
-		}
-
-		if (!user.projects.includes(projectId)) {
-			throw new CustomBadRequestError(
-				"This project does not belong to the user"
-			);
-		}
+		const user = await findUserByProjectId(_id, projectId);
 
 		const deletedProject = await Project.findOneAndDelete({
 			_id: projectId,
@@ -180,32 +123,3 @@ export async function deleteProject(req, res, next) {
 		return next(error);
 	}
 }
-
-// export async function fetchAllProjects(req, res, next) {
-// 	try {
-// 		const start = parseInt(req.query.start) || 0;
-// 		const limit = parseInt(req.query.limit) || 10;
-
-// 		const projects = await Project.find()
-// 			.skip(start)
-// 			.limit(limit)
-// 			.sort({ createdAt: -1 });
-
-// 		const total = await Project.countDocuments();
-
-// 		res.status(200).json({
-// 			statusCode: 200,
-// 			message: "Projects fetched successfully",
-// 			projects,
-// 			pagination: {
-// 				start,
-// 				limit,
-// 				total,
-// 				hasNextPage: start + limit < total,
-// 			},
-// 		});
-// 	} catch (error) {
-// 		console.error(error);
-// 		next(error);
-// 	}
-// }

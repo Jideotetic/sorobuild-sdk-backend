@@ -69,8 +69,8 @@ export const generateTokenPayloadValidation = [
 		.notEmpty()
 		.withMessage("api_id is required")
 		.custom((value) => {
-			const blockedEmails = ["string"];
-			if (blockedEmails.includes(value.toLowerCase())) {
+			const blockedApiId = ["string"];
+			if (blockedApiId.includes(value.toLowerCase())) {
 				throw new Error("api_id is required");
 			}
 			return true;
@@ -111,8 +111,8 @@ export const updateProjectPayloadValidation = [
 		.notEmpty()
 		.withMessage("Name is required")
 		.custom((value) => {
-			const blockedEmails = ["string"];
-			if (blockedEmails.includes(value.toLowerCase())) {
+			const blockedName = ["string"];
+			if (blockedName.includes(value.toLowerCase())) {
 				throw new Error("Name is required");
 			}
 			return true;

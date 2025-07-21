@@ -68,13 +68,6 @@ app.use(
 	rpcCreditsRouter
 );
 
-// app.use(
-// 	"/service",
-// 	// verifyAuthorizationToken,
-// 	// verifyIdToken,
-// 	rpcHorizonRouter
-// );
-
 app.use(
 	"/rpc",
 	// verifyAuthorizationToken,
