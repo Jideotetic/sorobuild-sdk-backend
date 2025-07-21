@@ -18,6 +18,18 @@
  *         schema:
  *           type: string
  *         description: The network to call testnet or public
+ *       - in: query
+ *         name: accountId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Account ID
+ *       - in: query
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Project ID
  *     requestBody:
  *       required: true
  *       content:
@@ -33,44 +45,11 @@
  *               type: object
  */
 
-import axios from "axios";
 import { Router } from "express";
+import { callRPCNetwork } from "../controllers/rpcController.js";
 
 const rpcRouter = Router();
 
-const ENDPOINTS = {
-	testnet: process.env.RPC_TESTNET_URL,
-	public: process.env.RPC_PUBLIC_URL,
-};
-
-rpcRouter.post("/:network", async (req, res) => {
-	const { network } = req.params;
-	const body = req.body;
-
-	if (!["testnet", "public"].includes(network)) {
-		return res
-			.status(400)
-			.json({ error: 'Invalid network. Use "testnet" or "public".' });
-	}
-
-	const baseUrl = ENDPOINTS[network];
-
-	try {
-		const { data, status } = await axios.post(baseUrl, body, {
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
-
-		console.log({ status, data, baseUrl });
-
-		res.status(status).json(data);
-	} catch (error) {
-		console.error(error.response?.data || error.message);
-		res.status(error.response?.status || 500).json({
-			error: error.response?.data || "Error forwarding request.",
-		});
-	}
-});
+rpcRouter.post("/:network", callRPCNetwork);
 
 export default rpcRouter;
