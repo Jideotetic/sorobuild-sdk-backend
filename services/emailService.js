@@ -3,6 +3,8 @@ import nodemailer from "nodemailer";
 export async function sendOnboardingEmail(email, token) {
 	// const transporter = nodemailer.createTransport({
 	// 	service: "Gmail",
+	// 	port: 465,
+	// 	secure: true,
 	// 	auth: {
 	// 		user: process.env.EMAIL_USER,
 	// 		pass: process.env.EMAIL_PASS,
@@ -25,11 +27,23 @@ export async function sendOnboardingEmail(email, token) {
 		const info = await transporter.sendMail({
 			from: `"SoroBuild" <${process.env.EMAIL_USER}>`,
 			to: email,
-			subject: "Complete your registration",
+			subject: "Verify Your Email",
 			html: `
-				<p>Hello,</p>
-				<p>Click the link below to complete your registration:</p>
-				<a href="${verificationUrl}">${verificationUrl}</a>
+				<div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <h2>Welcome to SoroBuild!</h2>
+     			 <p>
+        			To start using SoroBuild, please click the link below to verify your email:
+      			</p>
+      			<p>
+       				<a href="${verificationUrl}" 
+           				style="display: inline-block; padding: 10px 15px; background-color: #007BFF; color: #fff; text-decoration: none; border-radius: 5px;">
+          				Verify Your Email
+        			</a>
+      			</p>
+      			<p>If you didn't sign up for SoroBuild, you can ignore this email.</p>
+      			<p>Thank you,<br>The SoroBuild Team</p>
+                </div>
+
 			`,
 		});
 
