@@ -39,8 +39,8 @@ import { Router } from "express";
 const rpcRouter = Router();
 
 const ENDPOINTS = {
-	testnet: "https://base-testnet-rpc.soro.build",
-	public: "https://base-public-rpc.soro.build",
+	testnet: process.env.RPC_TESTNET_URL,
+	public: process.env.RPC_PUBLIC_URL,
 };
 
 rpcRouter.post("/:network", async (req, res) => {

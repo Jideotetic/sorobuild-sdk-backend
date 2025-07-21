@@ -51,8 +51,8 @@ import { Router } from "express";
 const horizonRouter = Router();
 
 const ENDPOINTS = {
-	testnet: "https://base-testnet-horizon.soro.build",
-	public: "https://base-public-horizon.soro.build",
+	testnet: process.env.HORIZON_TESTNET_URL,
+	public: process.env.HORIZON_PUBLIC_URL,
 };
 
 horizonRouter.get(

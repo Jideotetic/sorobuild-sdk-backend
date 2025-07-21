@@ -2,6 +2,7 @@ import CustomBadRequestError from "../errors/customBadRequestError.js";
 import crypto from "crypto";
 import { User } from "../schemas/user.js";
 import CustomNotFoundError from "../errors/customNotFoundError.js";
+import mongoose from "mongoose";
 
 export const extractIdToken = (req) => {
 	const header =
@@ -34,6 +35,54 @@ export async function findUser(_id) {
 	}
 
 	const user = await User.findOne({ _id });
+
+	if (!user) {
+		throw new CustomNotFoundError(
+			"User not found with the provided account ID"
+		);
+	}
+
+	return user;
+}
+
+export async function findUserByProjectId(_id, projectId) {
+	if (!_id || !projectId) {
+		throw new CustomBadRequestError("Account ID or Project ID missing");
+	}
+
+	if (!mongoose.Types.ObjectId.isValid(_id)) {
+		throw new CustomBadRequestError("Invalid accountId");
+	}
+
+	if (!mongoose.Types.ObjectId.isValid(projectId)) {
+		throw new CustomBadRequestError("Invalid projectId format");
+	}
+
+	const user = await User.findOne({ _id });
+
+	if (!user) {
+		throw new CustomNotFoundError(
+			"User not found with the provided account ID"
+		);
+	}
+
+	if (!user.projects.includes(projectId)) {
+		throw new CustomBadRequestError("This project does not belong to the user");
+	}
+
+	return user;
+}
+
+export async function findUserProjects(_id) {
+	if (!_id) {
+		throw new CustomBadRequestError("Account ID missing");
+	}
+
+	if (!mongoose.Types.ObjectId.isValid(_id)) {
+		throw new CustomBadRequestError("Invalid accountId");
+	}
+
+	const user = await User.findOne({ _id }).populate("projects");
 
 	if (!user) {
 		throw new CustomNotFoundError(

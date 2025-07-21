@@ -349,8 +349,6 @@ projectRouter.post(
 	createProject
 );
 
-// projectRouter.get("/", fetchAllProjects);
-
 projectRouter.get("/:accountId", fetchAllUserProjects);
 
 projectRouter.put(
