@@ -26,6 +26,8 @@ const app = express();
 
 await connectToMongoDB();
 
+app.set("json spaces", 2);
+
 // Cors stuff
 const allowedOrigins = [
 	"https://soro.build",
