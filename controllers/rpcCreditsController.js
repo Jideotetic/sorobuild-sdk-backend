@@ -3,26 +3,13 @@ import CustomBadRequestError from "../errors/customBadRequestError.js";
 import CustomNotFoundError from "../errors/customNotFoundError.js";
 import { User } from "../schemas/user.js";
 import { verifyRequestBody } from "../middlewares/guards.js";
+import { findUser } from "../utils/lib.js";
 
 export async function getAccountRpcCredits(req, res, next) {
 	try {
 		const { accountId: _id } = req.params;
 
-		if (!_id) {
-			throw new CustomBadRequestError("Account ID missing");
-		}
-
-		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError("Invalid accountId");
-		}
-
-		const user = await User.findOne({ _id });
-
-		if (!user) {
-			throw new CustomNotFoundError(
-				"User not found with the provided account ID"
-			);
-		}
+		const user = await findUser(_id);
 
 		res.status(200).json({
 			statusCode: 200,
@@ -41,21 +28,7 @@ export async function buyRpcCredits(req, res, next) {
 
 		const { accountId: _id } = req.params;
 
-		if (!_id) {
-			throw new CustomBadRequestError("Account ID missing");
-		}
-
-		if (!mongoose.Types.ObjectId.isValid(_id)) {
-			throw new CustomBadRequestError("Invalid accountId");
-		}
-
-		const user = await User.findOne({ _id });
-
-		if (!user) {
-			throw new CustomNotFoundError(
-				"User not found with the provided account ID"
-			);
-		}
+		const user = await findUser(_id);
 
 		res.status(200).json({
 			statusCode: 200,
