@@ -1,7 +1,3 @@
-import mongoose from "mongoose";
-import CustomBadRequestError from "../errors/customBadRequestError.js";
-import CustomNotFoundError from "../errors/customNotFoundError.js";
-import { User } from "../schemas/user.js";
 import { verifyRequestBody } from "../middlewares/guards.js";
 import { findUser } from "../utils/lib.js";
 

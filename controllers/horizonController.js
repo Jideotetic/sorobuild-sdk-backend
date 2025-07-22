@@ -8,7 +8,7 @@ const ENDPOINTS = {
 	public: process.env.HORIZON_PUBLIC_URL,
 };
 
-export async function callHorizonNetwork(req, res) {
+export async function callHorizonNetwork(req, res, next) {
 	const { network, primaryResource, secondaryResource, tertiaryResource } =
 		req.params;
 
@@ -57,11 +57,12 @@ export async function callHorizonNetwork(req, res) {
 
 		res.status(status).json({
 			statusCode: status,
-			message: "Successful operation",
 			data,
 		});
 	} catch (error) {
-		console.error(error);
-		next(error);
+		console.error(error.response?.data || error.message);
+		res.status(error.response?.status || 500).json({
+			error: error.response?.data || "Error forwarding request.",
+		});
 	}
 }

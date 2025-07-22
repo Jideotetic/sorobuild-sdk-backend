@@ -8,12 +8,12 @@ const ENDPOINTS = {
 	public: process.env.RPC_PUBLIC_URL,
 };
 
-export async function callRPCNetwork(req, res) {
+export async function callRPCNetwork(req, res, next) {
 	const { network } = req.params;
 	const { accountId: _id, projectId } = req.query;
 	const body = req.body;
 
-	const {user, project} = await findUserByProjectId(_id, projectId);
+	const { user, project } = await findUserByProjectId(_id, projectId);
 
 	if (!["testnet", "public"].includes(network)) {
 		throw new CustomBadRequestError(
@@ -39,11 +39,12 @@ export async function callRPCNetwork(req, res) {
 
 		res.status(status).json({
 			statusCode: status,
-			message: "Successful operation",
 			data,
 		});
 	} catch (error) {
-		console.error(error);
-		next(error);
+		console.error(error.response?.data || error.message);
+		res.status(error.response?.status || 500).json({
+			error: error.response?.data || "Error forwarding request.",
+		});
 	}
 }
