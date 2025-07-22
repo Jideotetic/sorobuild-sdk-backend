@@ -70,7 +70,7 @@ export async function updateProject(req, res, next) {
 		const { name, devMode, whitelistedDomain } = req.body;
 		const { accountId: _id, projectId } = req.params;
 
-		const user = await findUserByProjectId(_id, projectId);
+		const { user } = await findUserByProjectId(_id, projectId);
 
 		const updatedProject = await Project.findOneAndUpdate(
 			{ _id: projectId, owner: user._id },
@@ -99,7 +99,7 @@ export async function deleteProject(req, res, next) {
 	try {
 		const { accountId: _id, projectId } = req.params;
 
-		const user = await findUserByProjectId(_id, projectId);
+		const { user } = await findUserByProjectId(_id, projectId);
 
 		const deletedProject = await Project.findOneAndDelete({
 			_id: projectId,
