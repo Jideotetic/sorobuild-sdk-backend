@@ -389,11 +389,15 @@ authRouter.post(
 
 authRouter.get(
 	"/google",
-	// verifyAuthorizationToken,
+	verifyAuthorizationToken,
 	passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-authRouter.get("/google/callback", passportAuthHandler("google", 200));
+authRouter.get(
+	"/google/callback",
+	verifyAuthorizationToken,
+	passportAuthHandler("google", 200)
+);
 
 authRouter.post("/signout", verifyAuthorizationToken, verifyIdToken, signout);
 
