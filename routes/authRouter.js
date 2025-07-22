@@ -317,6 +317,22 @@
  *         description: Internal server error
  */
 
+/**
+ * @swagger
+ * /auth/google:
+ *    get:
+ *      summary: Sign in with Google (requires redirect)
+ *      tags: [Auth]
+ *      security:
+ *       - Authorization: []
+ *      description:
+ *        This route redirects the user to Google for authentication.
+ *        This cannot be tested from Swagger UI use a browser instead.
+ *      responses:
+ *        302:
+ *          description: Redirects to Google OAuth
+ */
+
 import { Router } from "express";
 import {
 	validateEmail,
@@ -337,6 +353,7 @@ import {
 } from "../middlewares/guards.js";
 import { authRateLimiter } from "../middlewares/rateLimit.js";
 import { passportAuthHandler } from "../middlewares/authenticate.js";
+import passport from "passport";
 
 const authRouter = Router();
 
@@ -369,6 +386,14 @@ authRouter.post(
 	validateSignIn,
 	passportAuthHandler("signin", 200)
 );
+
+authRouter.get(
+	"/google",
+	// verifyAuthorizationToken,
+	passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+authRouter.get("/google/callback", passportAuthHandler("google", 200));
 
 authRouter.post("/signout", verifyAuthorizationToken, verifyIdToken, signout);
 

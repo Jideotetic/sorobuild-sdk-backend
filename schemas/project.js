@@ -14,9 +14,9 @@ const projectSchema = new mongoose.Schema({
 		type: Boolean,
 		default: true,
 	},
-	projectKey: {
+	apiSecret: {
 		type: String,
-		default: uuidv4(),
+		default: null,
 	},
 	owner: {
 		type: mongoose.Schema.Types.ObjectId,

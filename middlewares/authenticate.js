@@ -14,6 +14,7 @@ export async function handleAuthCallback(
 	statusCode
 ) {
 	if (err || !user) {
+		console.error("Auth failed:", { err, info });
 		const message = info.message || "Authentication failed";
 		if (message === "No user found ...Kindly sign up") {
 			return next(new CustomNotFoundError(message));

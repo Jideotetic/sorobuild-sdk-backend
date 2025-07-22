@@ -4,6 +4,10 @@ import { User } from "../schemas/user.js";
 import { Project } from "../schemas/project.js";
 import { Strategy as JWTstrategy, ExtractJwt } from "passport-jwt";
 import { extractIdToken } from "../utils/lib.js";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
+import stream from "stream";
 
 passport.use(
 	"signup",
@@ -121,6 +125,102 @@ passport.use(
 				return done(null, token.type);
 			} catch (error) {
 				return done(error, false);
+			}
+		}
+	)
+);
+
+passport.use(
+	new GoogleStrategy(
+		{
+			clientID: process.env.GOOGLE_CLIENT_ID,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+			callbackURL: process.env.GOOGLE_CALLBACK_URL,
+		},
+		async (accessToken, refreshToken, profile, done) => {
+			try {
+				const email = profile.emails?.[0]?.value;
+
+				// 1. Try existing user with googleId
+				let userByGoogleId = await User.findOne({ googleId: profile.id });
+				if (userByGoogleId) {
+					return done(null, userByGoogleId, {
+						message: "Signed in with Google Successfully",
+					});
+				}
+
+				// 2. Try existing user with email
+				let userByEmail = await User.findOne({ email });
+
+				if (userByEmail) {
+					// Safety check: if the user already has a googleId that doesn’t match current profile
+					if (userByEmail.googleId && userByEmail.googleId !== profile.id) {
+						return done(null, false, {
+							message:
+								"This Google account does not match the existing linked Google account.",
+						});
+					}
+
+					// Otherwise, link Google to this account
+					userByEmail.googleId = profile.id;
+					if (!userByEmail.authProviders.includes("google")) {
+						userByEmail.authProviders.push("google");
+					}
+					await userByEmail.save();
+					return done(null, userByEmail, {
+						message: "Linked Google to existing account",
+					});
+				}
+
+				// 3. New user signup
+				// const avatarUrl = profile.photos?.[0]?.value;
+				// const response = await axios.get(avatarUrl, {
+				// 	responseType: "arraybuffer",
+				// });
+
+				// const buffer = Buffer.from(response.data, "binary");
+				// const bucket = getGridFSBucket();
+				// const filename = `google_avatar_${uuidv4()}.jpg`;
+
+				// const file = await new Promise((resolve, reject) => {
+				// 	const uploadStream = bucket.openUploadStream(filename, {
+				// 		contentType: response.headers["content-type"],
+				// 	});
+				// 	const bufferStream = new stream.PassThrough();
+				// 	bufferStream.end(buffer);
+				// 	bufferStream.pipe(uploadStream);
+				// 	uploadStream.on("error", reject);
+				// 	uploadStream.on("finish", resolve);
+				// });
+
+				const newUser = new User({
+					email,
+					name: profile.displayName,
+					googleId: profile.id,
+					authProviders: ["google"],
+					isVerified: true,
+				});
+
+				await newUser.save();
+
+				const newProject = new Project({
+					owner: newUser._id,
+					whitelistedDomain: "",
+				});
+				await newProject.save();
+
+				newUser.projects.push(newProject._id);
+				await newUser.save();
+
+				const populatedUser = await User.findById(newUser._id).populate(
+					"projects"
+				);
+				return done(null, populatedUser, {
+					message: "Google signup successful",
+				});
+			} catch (err) {
+				console.error("Google Strategy Error:", err);
+				return done(err);
 			}
 		}
 	)
