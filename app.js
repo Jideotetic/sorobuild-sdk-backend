@@ -21,6 +21,7 @@ import {
 } from "./middlewares/guards.js";
 
 import "./middlewares/passport.js";
+import { dynamicCORS } from "./middlewares/dynamicCors.js";
 
 const app = express();
 
@@ -36,7 +37,7 @@ const allowedOrigins = [
 	"https://sorobuild-sdk-backend.onrender.com",
 ];
 
-const corsOptions = {
+const staticCorsOptions = {
 	origin: function (origin, callback) {
 		if (!origin) return callback(null, true);
 		if (allowedOrigins.includes(origin)) {
@@ -49,7 +50,16 @@ const corsOptions = {
 	credentials: true,
 };
 
-app.use(cors(corsOptions));
+app.use(cors(staticCorsOptions));
+
+// Allow static cors from our frontend application
+// app.use((req, res, next) => {
+// 	const openRoutes = ["/auth", "/project", "/rpc-credits"];
+// 	if (openRoutes.some((r) => req.path.startsWith(r))) {
+// 		return cors(staticCorsOptions)(req, res, next);
+// 	}
+// 	return next();
+// });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -68,19 +78,9 @@ app.use(
 	rpcCreditsRouter
 );
 
-app.use(
-	"/rpc",
-	// verifyAuthorizationToken,
-	// verifyIdToken,
-	rpcRouter
-);
+app.use("/rpc", rpcRouter);
 
-app.use(
-	"/horizon",
-	// verifyAuthorizationToken,
-	// verifyIdToken,
-	horizonRouter
-);
+app.use("/horizon", horizonRouter);
 
 // Catch all route
 app.all("/", verifyAuthorizationToken, verifyIdToken, (req, res, next) => {

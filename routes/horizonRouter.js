@@ -101,6 +101,7 @@ import { Router } from "express";
 import { callHorizonNetwork } from "../controllers/horizonController.js";
 import CustomBadRequestError from "../errors/customBadRequestError.js";
 import axios from "axios";
+import { dynamicCORS } from "../middlewares/dynamicCors.js";
 
 const horizonRouter = Router();
 
@@ -111,7 +112,7 @@ const ENDPOINTS = {
 
 horizonRouter.get(
 	"/:network/open{/:primaryResource}{/:secondaryResource}{/:tertiaryResource}",
-	async (req, res, next) => {
+	async (req, res) => {
 		const { network, primaryResource, secondaryResource, tertiaryResource } =
 			req.params;
 
@@ -162,6 +163,7 @@ horizonRouter.get(
 
 horizonRouter.get(
 	"/:network{/:primaryResource}{/:secondaryResource}{/:tertiaryResource}",
+	dynamicCORS,
 	callHorizonNetwork
 );
 
