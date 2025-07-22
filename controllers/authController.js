@@ -142,7 +142,7 @@ export async function validateSignIn(req, res, next) {
 	}
 }
 
-export async function signout(req, res) {
+export async function signout(req, res, next) {
 	try {
 		// Blacklist token
 		const token = req.token;

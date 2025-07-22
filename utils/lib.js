@@ -58,7 +58,7 @@ export async function findUserByProjectId(_id, projectId) {
 		throw new CustomBadRequestError("Invalid projectId format");
 	}
 
-	const user = await User.findOne({ _id });
+	const user = await User.findOne({ _id }).populate("projects");
 
 	if (!user) {
 		throw new CustomNotFoundError(
@@ -66,11 +66,15 @@ export async function findUserByProjectId(_id, projectId) {
 		);
 	}
 
-	if (!user.projects.includes(projectId)) {
+	const project = user.projects.find(
+		(p) => p._id.toString() === projectId.toString()
+	);
+
+	if (!project) {
 		throw new CustomBadRequestError("This project does not belong to the user");
 	}
 
-	return user;
+	return {user, project};
 }
 
 export async function findUserProjects(_id) {

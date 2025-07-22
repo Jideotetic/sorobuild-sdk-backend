@@ -1,4 +1,5 @@
 import CustomBadRequestError from "../errors/customBadRequestError.js";
+import CustomForbiddenError from "../errors/customForbiddenError.js";
 import { findUserByProjectId } from "../utils/lib.js";
 import axios from "axios";
 
@@ -7,17 +8,21 @@ const ENDPOINTS = {
 	public: process.env.RPC_PUBLIC_URL,
 };
 
-export async function callRPCNetwork(req, res) {
+export async function callRPCNetwork(req, res, next) {
 	const { network } = req.params;
 	const { accountId: _id, projectId } = req.query;
 	const body = req.body;
 
-	const user = await findUserByProjectId(_id, projectId);
+	const { user, project } = await findUserByProjectId(_id, projectId);
 
 	if (!["testnet", "public"].includes(network)) {
 		throw new CustomBadRequestError(
 			'Invalid network. Use "testnet" or "public".'
 		);
+	}
+
+	if (user.rpcCredits < 2) {
+		throw new CustomForbiddenError("Not enough RPC credits");
 	}
 
 	const baseUrl = ENDPOINTS[network];
@@ -29,11 +34,17 @@ export async function callRPCNetwork(req, res) {
 			},
 		});
 
-		console.log({ status, data, baseUrl });
+		user.rpcCredits -= 2;
+		await user.save();
 
-		res.status(status).json(data);
+		res.status(status).json({
+			statusCode: status,
+			data,
+		});
 	} catch (error) {
-		console.error(error);
-		next(error);
+		console.error(error.response?.data || error.message);
+		res.status(error.response?.status || 500).json({
+			error: error.response?.data || "Error forwarding request.",
+		});
 	}
 }

@@ -1,4 +1,5 @@
 import CustomBadRequestError from "../errors/customBadRequestError.js";
+import CustomForbiddenError from "../errors/customForbiddenError.js";
 import { findUserByProjectId } from "../utils/lib.js";
 import axios from "axios";
 
@@ -7,13 +8,13 @@ const ENDPOINTS = {
 	public: process.env.HORIZON_PUBLIC_URL,
 };
 
-export async function callHorizonNetwork(req, res) {
+export async function callHorizonNetwork(req, res, next) {
 	const { network, primaryResource, secondaryResource, tertiaryResource } =
 		req.params;
 
 	const { accountId: _id, projectId } = req.query;
 
-	const user = await findUserByProjectId(_id, projectId);
+	const { user, project } = await findUserByProjectId(_id, projectId);
 
 	if (!["testnet", "public"].includes(network)) {
 		throw new CustomBadRequestError(
@@ -40,6 +41,10 @@ export async function callHorizonNetwork(req, res) {
 		targetUrl += `/${tertiaryResource}`;
 	}
 
+	if (user.rpcCredits < 2) {
+		throw new CustomForbiddenError("Not enough RPC credits");
+	}
+
 	try {
 		const { data, status } = await axios.get(targetUrl, {
 			headers: {
@@ -47,9 +52,17 @@ export async function callHorizonNetwork(req, res) {
 			},
 		});
 
-		res.status(status).json(data);
+		user.rpcCredits -= 2;
+		await user.save();
+
+		res.status(status).json({
+			statusCode: status,
+			data,
+		});
 	} catch (error) {
-		console.error(error);
-		next(error);
+		console.error(error.response?.data || error.message);
+		res.status(error.response?.status || 500).json({
+			error: error.response?.data || "Error forwarding request.",
+		});
 	}
 }
