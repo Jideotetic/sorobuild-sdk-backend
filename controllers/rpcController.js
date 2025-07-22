@@ -1,5 +1,6 @@
 import CustomBadRequestError from "../errors/customBadRequestError.js";
 import CustomForbiddenError from "../errors/customForbiddenError.js";
+import { dynamicCORS } from "../middlewares/dynamicCors.js";
 import { findUserByProjectId } from "../utils/lib.js";
 import axios from "axios";
 
@@ -8,12 +9,10 @@ const ENDPOINTS = {
 	public: process.env.RPC_PUBLIC_URL,
 };
 
-export async function callRPCNetwork(req, res, next) {
+export async function callRPCNetwork(req, res) {
 	const { network } = req.params;
-	const { accountId: _id, projectId } = req.query;
 	const body = req.body;
-
-	const { user, project } = await findUserByProjectId(_id, projectId);
+	const user = req.user;
 
 	if (!["testnet", "public"].includes(network)) {
 		throw new CustomBadRequestError(

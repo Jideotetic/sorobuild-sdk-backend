@@ -77,6 +77,7 @@ import { Router } from "express";
 import { callRPCNetwork } from "../controllers/rpcController.js";
 import CustomBadRequestError from "../errors/customBadRequestError.js";
 import axios from "axios";
+import { dynamicCORS } from "../middlewares/dynamicCors.js";
 
 const rpcRouter = Router();
 
@@ -85,7 +86,7 @@ const ENDPOINTS = {
 	public: process.env.RPC_PUBLIC_URL,
 };
 
-rpcRouter.post("/:network/open", async (req, res, next) => {
+rpcRouter.post("/:network/open", async (req, res) => {
 	const { network } = req.params;
 	const body = req.body;
 
@@ -116,6 +117,6 @@ rpcRouter.post("/:network/open", async (req, res, next) => {
 	}
 });
 
-rpcRouter.post("/:network", callRPCNetwork);
+rpcRouter.post("/:network", dynamicCORS, callRPCNetwork);
 
 export default rpcRouter;

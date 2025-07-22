@@ -8,13 +8,10 @@ const ENDPOINTS = {
 	public: process.env.HORIZON_PUBLIC_URL,
 };
 
-export async function callHorizonNetwork(req, res, next) {
+export async function callHorizonNetwork(req, res) {
 	const { network, primaryResource, secondaryResource, tertiaryResource } =
 		req.params;
-
-	const { accountId: _id, projectId } = req.query;
-
-	const { user, project } = await findUserByProjectId(_id, projectId);
+	const user = req.user;
 
 	if (!["testnet", "public"].includes(network)) {
 		throw new CustomBadRequestError(
