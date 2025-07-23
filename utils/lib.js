@@ -74,7 +74,7 @@ export async function findUserByProjectId(_id, projectId) {
 		throw new CustomBadRequestError("This project does not belong to the user");
 	}
 
-	return {user, project};
+	return { user, project };
 }
 
 export async function findUserProjects(_id) {
@@ -95,4 +95,16 @@ export async function findUserProjects(_id) {
 	}
 
 	return user;
+}
+
+export function buildRedirectUrl({ baseUrl, error, userBase64 }) {
+	const url = new URL(baseUrl);
+
+	if (userBase64) {
+		url.searchParams.set("success", encodeURIComponent(userBase64));
+	} else if (error) {
+		url.searchParams.set("error", encodeURIComponent(error));
+	}
+
+	return url.toString();
 }

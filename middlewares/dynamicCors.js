@@ -12,9 +12,9 @@ export async function dynamicCORS(req, res, next) {
 
 		// Check for project key if call is from a sever side application
 		if (!origin) {
-			const projectKey = req.headers["x-project-key"];
+			const apiSecret = req.headers["x-api-secret"];
 			if (!projectKey) {
-				throw new CustomBadRequestError("Project key is missing");
+				throw new CustomBadRequestError("API secret is missing");
 			}
 			req.user = user;
 			return next();
@@ -23,7 +23,6 @@ export async function dynamicCORS(req, res, next) {
 		// Check for whitelistedDomain if it is client and allow cors
 		if (project.whitelistedDomain && project.whitelistedDomain === origin) {
 			res.setHeader("Access-Control-Allow-Origin", origin);
-			// res.setHeader("Access-Control-Allow-Credentials", "true");
 			res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 			res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
 

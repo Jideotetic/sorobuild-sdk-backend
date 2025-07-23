@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
 		default: null,
 	},
 	avatar: {
+		type: String,
+		default: null,
+	},
+	avatar: {
 		type: mongoose.Schema.Types.ObjectId,
 		default: null,
 	},
