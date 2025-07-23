@@ -7,55 +7,6 @@ import { extractIdToken } from "../utils/lib.js";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
 passport.use(
-	"signup",
-	new LocalStrategy(
-		{
-			usernameField: "email",
-			passwordField: "password",
-			passReqToCallback: true,
-		},
-		async (req, email, password, done) => {
-			const { name } = req.body;
-
-			try {
-				const existingUser = await User.findOne({ email });
-
-				if (existingUser) {
-					return done(null, false, {
-						message: "User already exist...Kindly sign in",
-					});
-				}
-
-				const newUser = new User({
-					email,
-					name,
-					password,
-					authProviders: ["email"],
-				});
-
-				await newUser.save();
-
-				const newProject = new Project({
-					owner: newUser._id,
-					whitelistedDomain: "",
-				});
-
-				await newProject.save();
-
-				newUser.projects.push(newProject._id);
-				await newUser.save();
-
-				const user = await User.findOne(newUser._id).populate("projects");
-
-				return done(null, user, { message: "User created successfully" });
-			} catch (err) {
-				return done(err);
-			}
-		}
-	)
-);
-
-passport.use(
 	"signin",
 	new LocalStrategy(
 		{

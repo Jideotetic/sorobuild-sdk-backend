@@ -6,6 +6,7 @@ import { sendOnboardingEmail } from "../services/emailService.js";
 import { verifyRequestBody } from "../middlewares/guards.js";
 import { generateVerificationToken } from "../utils/lib.js";
 import { blacklistToken } from "../middlewares/blackListToken.js";
+import CustomForbiddenError from "../errors/customForbiddenError.js";
 
 export const generateAuthorizationToken = async (req, res, next) => {
 	try {
@@ -44,11 +45,18 @@ export async function validateEmail(req, res, next) {
 
 		const existingUser = await User.findOne({ email });
 
+		if (existingUser && existingUser.authProviders.includes("google")) {
+			throw new CustomForbiddenError("Account already linked via google");
+		}
+
+		if (existingUser && existingUser.authProviders.includes("walletId")) {
+			throw new CustomForbiddenError("Account already linked via wallet");
+		}
+
 		if (existingUser && existingUser.isVerified) {
 			return res.status(200).json({
 				statusCode: 200,
 				message: "User exist, Prompt for password.",
-				email: email,
 				userExists: true,
 				nextAction: "REQUEST_PASSWORD",
 			});
@@ -59,7 +67,6 @@ export async function validateEmail(req, res, next) {
 				statusCode: 200,
 				message:
 					"User exist, Check the previous email that was sent to complete registration.",
-				email: email,
 				userExists: true,
 				nextAction: "COMPLETE_PREVIOUS_EMAIL_VERIFICATION",
 			});
@@ -79,7 +86,6 @@ export async function validateEmail(req, res, next) {
 		return res.status(200).json({
 			statusCode: 200,
 			message: "Check your email to complete registration.",
-			email,
 			userExists: false,
 			nextAction: "COMPLETE_EMAIL_VERIFICATION",
 		});
@@ -134,6 +140,16 @@ export async function verifyUser(req, res, next) {
 export async function validateSignIn(req, res, next) {
 	try {
 		verifyRequestBody(req);
+
+		const { email } = req.body;
+
+		const user = await User.findOne({ email });
+
+		if (!user.authProviders.includes("email")) {
+			throw new CustomForbiddenError(
+				"Account is not linked via email...try other sign in method"
+			);
+		}
 
 		next();
 	} catch (error) {

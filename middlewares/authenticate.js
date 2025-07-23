@@ -30,7 +30,6 @@ export async function handleAuthCallback(
 
 		const JWT_SECRET = process.env.JWT_SECRET;
 
-		const body = { ...user };
 		const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, {
 			expiresIn: "24h",
 		});
@@ -50,7 +49,6 @@ export async function handleAuthCallback(
 
 export function passportAuthHandler(strategyName, statusCode) {
 	return (req, res, next) => {
-		console.log("🚨  Callback route hit!", req.url);
 		passport.authenticate(strategyName, (err, user, info) => {
 			handleAuthCallback(req, res, next, err, user, info, statusCode);
 		})(req, res, next);
@@ -108,7 +106,7 @@ export async function handleGoogleAuthCallback(
 
 		const redirectUrl = buildRedirectUrl({
 			baseUrl: redirectBaseUrl,
-			error: "Internal server error during login",
+			error: "Something went wrong",
 		});
 
 		return res.redirect(redirectUrl);

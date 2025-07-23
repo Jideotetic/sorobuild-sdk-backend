@@ -21,18 +21,17 @@ import {
 } from "./middlewares/guards.js";
 
 import "./middlewares/passport.js";
-import { dynamicCORS } from "./middlewares/dynamicCors.js";
 
 const app = express();
 
 await connectToMongoDB();
 
+// Pretty print
 app.set("json spaces", 2);
 
 // Cors stuff
 const allowedOrigins = [
 	"https://soro.build",
-	"http://localhost:5173",
 	"http://localhost:3000",
 	"https://sorobuild-sdk-backend.onrender.com",
 ];
