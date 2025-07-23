@@ -14,7 +14,7 @@
  *         whitelistedDomain:
  *           type: string
  *           description: Domain allowed to use this project
- *         projectKey:
+ *         apiSecret:
  *           type: string
  *           description: Unique key to identify a project
  *         devMode:
@@ -26,13 +26,6 @@
  *         createdAt:
  *           type: string
  *           description: Timestamp when the project was created
- *       example:
- *         _id: 687a03c9399764f331370f96
- *         name: Default Project
- *         whitelistedDomain: https://example.com
- *         devMode: true
- *         owner: 687a03c9399764f331370f96
- *         createdAt: 2025-07-16T12:00:00.000Z
  */
 
 /**

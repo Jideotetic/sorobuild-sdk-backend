@@ -1,7 +1,5 @@
 import CustomBadRequestError from "../errors/customBadRequestError.js";
 import CustomForbiddenError from "../errors/customForbiddenError.js";
-import { dynamicCORS } from "../middlewares/dynamicCors.js";
-import { findUserByProjectId } from "../utils/lib.js";
 import axios from "axios";
 
 const ENDPOINTS = {

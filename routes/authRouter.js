@@ -12,11 +12,11 @@
  *          description: Unique account ID
  *         email:
  *           type: string
- *           description: User's email address
+ *           description: Unique user's email address
  *         name:
  *           type: string
  *           nullable: true
- *           description: User's name
+ *           description: User's full name
  *         avatar:
  *           type: string
  *           nullable: true
@@ -53,28 +53,6 @@
  *         createdAt:
  *           type: string
  *           description: Account creation timestamp
- *       example:
- *         _id: 687a03c9399764f331370f96
- *         email: user@example.com
- *         name: Joh Doe
- *         avatar: 687a03c9399764f331370f96
- *         isVerified: false
- *         authProviders: [email]
- *         googleId: null
- *         githubId: null
- *         discordId: null
- *         walletId: null
- *         rpcCredits: 100_000
- *         projects: [
- *           {
- *             _id: 687a03c9399764f331370f96,
- *             name: Default Project,
- *             whitelistedDomain: https://example.com,
- *             devMode: true,
- *             createdAt: 2025-07-16T12:00:00.000Z
- *            }
- *          ]
- *         createdAt: 2025-07-16T15:00:00.000Z
  */
 
 /**
@@ -158,10 +136,11 @@
  *                   example: 200
  *                 message:
  *                   type: string
+ *                   enum:
+ *                     - User exist, Prompt for password
+ *                     - User exist, Check the previous email that was sent to complete registration
+ *                     - Check your email to complete registration
  *                   example: User exist, Prompt for password.
- *                 email:
- *                   type: string
- *                   example: user@example.com
  *                 userExists:
  *                   type: boolean
  *                   example: true
@@ -172,55 +151,6 @@
  *                     - COMPLETE_EMAIL_VERIFICATION
  *                     - REQUEST_PASSWORD
  *                   example: REQUEST_PASSWORD
- *       401:
- *         description: Unauthorized Request
- *       400:
- *         description: Bad Request
- *       500:
- *         description: Internal server error
- */
-
-/**
- * @swagger
- * /auth/signin:
- *   post:
- *     summary: Authenticate a user
- *     tags: [Auth]
- *     security:
- *       - Authorization: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: string
- *               password:
- *                 type: string
- *                 example: string
- *     responses:
- *       200:
- *         description: User authenticated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 statusCode:
- *                   type: integer
- *                   example: 200
- *                 message:
- *                   type: string
- *                   example: User authenticated successfully
- *                 user:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/User'
- *                 token:
- *                   type: string
  *       401:
  *         description: Unauthorized Request
  *       400:
@@ -284,6 +214,71 @@
 
 /**
  * @swagger
+ * /auth/signin:
+ *   post:
+ *     summary: Authenticate a user
+ *     tags: [Auth]
+ *     security:
+ *       - Authorization: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: string
+ *               password:
+ *                 type: string
+ *                 example: string
+ *     responses:
+ *       200:
+ *         description: User authenticated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusCode:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: User authenticated successfully
+ *                 user:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *                 token:
+ *                   type: string
+ *       401:
+ *         description: Unauthorized Request
+ *       400:
+ *         description: Bad Request
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /auth/google:
+ *    get:
+ *      summary: Sign in with Google (requires redirect)
+ *      tags: [Auth]
+ *      security:
+ *       - Authorization: []
+ *      description:
+ *        This route redirects the user to Google for authentication.
+ *        This cannot be tested from Swagger UI use a browser instead.
+ *      responses:
+ *        302:
+ *          description: Redirects to Google OAuth
+ */
+
+/**
+ * @swagger
  * /auth/signout:
  *   post:
  *     summary: Sign out a user
@@ -315,22 +310,6 @@
  *         description: Unauthorized Request
  *       500:
  *         description: Internal server error
- */
-
-/**
- * @swagger
- * /auth/google:
- *    get:
- *      summary: Sign in with Google (requires redirect)
- *      tags: [Auth]
- *      security:
- *       - Authorization: []
- *      description:
- *        This route redirects the user to Google for authentication.
- *        This cannot be tested from Swagger UI use a browser instead.
- *      responses:
- *        302:
- *          description: Redirects to Google OAuth
  */
 
 import { Router } from "express";
@@ -392,6 +371,7 @@ authRouter.post(
 
 authRouter.get(
 	"/google",
+	verifyAuthorizationToken,
 	passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
