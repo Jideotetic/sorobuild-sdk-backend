@@ -352,7 +352,10 @@ import {
 	verifyIdToken,
 } from "../middlewares/guards.js";
 import { authRateLimiter } from "../middlewares/rateLimit.js";
-import { passportAuthHandler } from "../middlewares/authenticate.js";
+import {
+	handleGoogleAuthCallback,
+	passportAuthHandler,
+} from "../middlewares/authenticate.js";
 import passport from "passport";
 
 const authRouter = Router();
@@ -389,15 +392,14 @@ authRouter.post(
 
 authRouter.get(
 	"/google",
-	verifyAuthorizationToken,
 	passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-authRouter.get(
-	"/google/callback",
-	verifyAuthorizationToken,
-	passportAuthHandler("google", 200)
-);
+authRouter.get("/google/callback", async (req, res, next) => {
+	passport.authenticate("google", (err, user, info) => {
+		handleGoogleAuthCallback(req, res, next, err, user, info);
+	})(req, res, next);
+});
 
 authRouter.post("/signout", verifyAuthorizationToken, verifyIdToken, signout);
 

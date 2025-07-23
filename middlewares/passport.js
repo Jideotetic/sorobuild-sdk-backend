@@ -5,9 +5,6 @@ import { Project } from "../schemas/project.js";
 import { Strategy as JWTstrategy, ExtractJwt } from "passport-jwt";
 import { extractIdToken } from "../utils/lib.js";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import axios from "axios";
-import { v4 as uuidv4 } from "uuid";
-import stream from "stream";
 
 passport.use(
 	"signup",
@@ -171,27 +168,6 @@ passport.use(
 						message: "Linked Google to existing account",
 					});
 				}
-
-				// 3. New user signup
-				// const avatarUrl = profile.photos?.[0]?.value;
-				// const response = await axios.get(avatarUrl, {
-				// 	responseType: "arraybuffer",
-				// });
-
-				// const buffer = Buffer.from(response.data, "binary");
-				// const bucket = getGridFSBucket();
-				// const filename = `google_avatar_${uuidv4()}.jpg`;
-
-				// const file = await new Promise((resolve, reject) => {
-				// 	const uploadStream = bucket.openUploadStream(filename, {
-				// 		contentType: response.headers["content-type"],
-				// 	});
-				// 	const bufferStream = new stream.PassThrough();
-				// 	bufferStream.end(buffer);
-				// 	bufferStream.pipe(uploadStream);
-				// 	uploadStream.on("error", reject);
-				// 	uploadStream.on("finish", resolve);
-				// });
 
 				const newUser = new User({
 					email,
