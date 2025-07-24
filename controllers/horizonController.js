@@ -1,6 +1,5 @@
 import CustomBadRequestError from "../errors/customBadRequestError.js";
 import CustomForbiddenError from "../errors/customForbiddenError.js";
-import { findUserByProjectId } from "../utils/lib.js";
 import axios from "axios";
 
 const ENDPOINTS = {

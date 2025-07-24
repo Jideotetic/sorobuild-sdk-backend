@@ -33,6 +33,7 @@ app.set("json spaces", 2);
 const allowedOrigins = [
 	"https://soro.build",
 	"http://localhost:3000",
+	"http://localhost:5173",
 	"https://sorobuild-sdk-backend.onrender.com",
 ];
 
@@ -50,15 +51,6 @@ const staticCorsOptions = {
 };
 
 app.use(cors(staticCorsOptions));
-
-// Allow static cors from our frontend application
-// app.use((req, res, next) => {
-// 	const openRoutes = ["/auth", "/project", "/rpc-credits"];
-// 	if (openRoutes.some((r) => req.path.startsWith(r))) {
-// 		return cors(staticCorsOptions)(req, res, next);
-// 	}
-// 	return next();
-// });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

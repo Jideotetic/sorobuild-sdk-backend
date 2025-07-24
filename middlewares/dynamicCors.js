@@ -1,19 +1,29 @@
 import CustomBadRequestError from "../errors/customBadRequestError.js";
-import { findUserByProjectId } from "../utils/lib.js";
+import CustomForbiddenError from "../errors/customForbiddenError.js";
+import { decryptProjectId, findUserByProjectId } from "../utils/lib.js";
 
 export async function dynamicCORS(req, res, next) {
 	try {
 		const origin = req.headers.origin;
-		const { accountId: _id, projectId } = req.query;
+		const { projectId } = req.query;
 
-		console.log({ origin, _id, projectId });
+		if (!projectId) {
+			throw new CustomBadRequestError("Project ID missing");
+		}
 
-		const { user, project } = await findUserByProjectId(_id, projectId);
+		const decrypted = decryptProjectId(projectId);
+		const [accountId, randomId, projectIdToken] = decrypted.split("_");
+
+		const { user, project } = await findUserByProjectId(
+			accountId,
+			projectIdToken,
+			randomId
+		);
 
 		// Check for project key if call is from a sever side application
 		if (!origin) {
 			const apiSecret = req.headers["x-api-secret"];
-			if (!projectKey) {
+			if (!apiSecret) {
 				throw new CustomBadRequestError("API secret is missing");
 			}
 			req.user = user;
@@ -33,13 +43,11 @@ export async function dynamicCORS(req, res, next) {
 			req.user = user;
 			return next();
 		} else {
-			return res.status(403).json({
-				statusCode: 403,
-				message: "Forbidden domain...update your project whitelisted domain",
-			});
+			throw new CustomForbiddenError(
+				"Forbidden domain...update your project whitelisted domain"
+			);
 		}
 	} catch (error) {
-		console.error("CORS error:", error);
-		return res.status(500).json({ error: error.message });
+		next(error);
 	}
 }
