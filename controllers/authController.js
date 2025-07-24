@@ -8,7 +8,6 @@ import { encryptProjectId, generateVerificationToken } from "../utils/lib.js";
 import { blacklistToken } from "../middlewares/blackListToken.js";
 import CustomForbiddenError from "../errors/customForbiddenError.js";
 import { v4 as uuidv4 } from "uuid";
-import { Buffer } from "buffer";
 
 export const generateAuthorizationToken = async (req, res, next) => {
 	try {
@@ -130,16 +129,16 @@ export async function verifyUser(req, res, next) {
 
 		await user.save();
 
-		const randomId = uuidv4();
+		const randomizedId = uuidv4();
 
 		const newProject = new Project({
 			owner: user._id,
-			randomId,
+			randomizedId,
 		});
 
 		await newProject.save();
 
-		const rawProjectId = `${user._id}_${randomId}_${newProject._id}`;
+		const rawProjectId = `${user._id}_${randomizedId}_${newProject._id}`;
 		const encryptedProjectId = encryptProjectId(rawProjectId);
 
 		newProject.projectId = encryptedProjectId;

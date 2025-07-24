@@ -1,44 +1,56 @@
-import CustomBadRequestError from "../errors/customBadRequestError.js";
-import { User } from "../schemas/user.js";
 import { Project } from "../schemas/project.js";
 import CustomNotFoundError from "../errors/customNotFoundError.js";
-import mongoose from "mongoose";
 import { verifyRequestBody } from "../middlewares/guards.js";
 import {
+	decryptProjectId,
+	encryptProjectId,
 	findUser,
 	findUserByProjectId,
 	findUserProjects,
+	formatProjectForResponse,
 } from "../utils/lib.js";
+import { v4 as uuidv4 } from "uuid";
+import CustomForbiddenError from "../errors/customForbiddenError.js";
 
 export async function createProject(req, res, next) {
 	try {
 		verifyRequestBody(req);
 
 		const { name, whitelistedDomain } = req.body;
-		const { accountId: _id } = req.params;
+		const incomingUser = req.user;
 
-		const user = await findUser(_id);
+		const user = await findUser(incomingUser.id);
 
 		if (user.projects.length >= user.projectLimit) {
-			throw new CustomBadRequestError("Project limit reached for this account");
+			throw new CustomForbiddenError("Project limit reached for this account");
 		}
+
+		const randomizedId = uuidv4();
 
 		const newProject = new Project({
 			owner: user._id,
 			name,
 			whitelistedDomain,
+			randomId: randomizedId,
 		});
 
 		await newProject.save();
 
-		user.projects.push(newProject._id);
+		const rawProjectId = `${user._id}_${randomizedId}_${newProject._id}`;
+		const encryptedProjectId = encryptProjectId(rawProjectId);
 
+		newProject.projectId = encryptedProjectId;
+		await newProject.save();
+
+		user.projects.push(newProject._id);
 		await user.save();
+
+		const safeProject = formatProjectForResponse(newProject);
 
 		res.status(201).json({
 			statusCode: 201,
 			message: "Project created successfully",
-			project: newProject,
+			project: safeProject,
 		});
 	} catch (error) {
 		console.error(error);
@@ -49,13 +61,16 @@ export async function createProject(req, res, next) {
 export async function fetchAllUserProjects(req, res, next) {
 	try {
 		const { accountId: _id } = req.params;
+		const incomingUser = req.user;
 
-		const user = await findUserProjects(_id);
+		const user = await findUserProjects(incomingUser.id);
+
+		const cleanedProjects = user.projects.map(formatProjectForResponse);
 
 		res.status(200).json({
 			statusCode: 200,
 			message: "User projects fetched successfully",
-			projects: user.projects,
+			projects: cleanedProjects,
 		});
 	} catch (error) {
 		console.error(error);
@@ -68,12 +83,19 @@ export async function updateProject(req, res, next) {
 		verifyRequestBody(req);
 
 		const { name, devMode, whitelistedDomain } = req.body;
-		const { accountId: _id, projectId } = req.params;
+		const { projectId } = req.params;
 
-		const { user } = await findUserByProjectId(_id, projectId);
+		const decrypted = decryptProjectId(projectId);
+		const [accountId, randomizedId, projectIdToken] = decrypted.split("_");
+
+		const { user, project } = await findUserByProjectId(
+			accountId,
+			projectIdToken,
+			randomizedId
+		);
 
 		const updatedProject = await Project.findOneAndUpdate(
-			{ _id: projectId, owner: user._id },
+			{ _id: project._id, owner: user._id },
 			{ name, devMode, whitelistedDomain },
 			{ new: true }
 		);
@@ -84,10 +106,12 @@ export async function updateProject(req, res, next) {
 			);
 		}
 
+		const safeProject = formatProjectForResponse(updatedProject);
+
 		res.status(200).json({
 			statusCode: 200,
 			message: "Project updated successfully",
-			project: updatedProject,
+			project: safeProject,
 		});
 	} catch (error) {
 		console.error(error);
@@ -97,12 +121,19 @@ export async function updateProject(req, res, next) {
 
 export async function deleteProject(req, res, next) {
 	try {
-		const { accountId: _id, projectId } = req.params;
+		const { projectId } = req.params;
 
-		const { user } = await findUserByProjectId(_id, projectId);
+		const decrypted = decryptProjectId(projectId);
+		const [accountId, randomizedId, projectIdToken] = decrypted.split("_");
+
+		const { user, project } = await findUserByProjectId(
+			accountId,
+			projectIdToken,
+			randomizedId
+		);
 
 		const deletedProject = await Project.findOneAndDelete({
-			_id: projectId,
+			_id: project._id,
 			owner: user._id,
 		});
 
@@ -110,7 +141,9 @@ export async function deleteProject(req, res, next) {
 			throw new CustomNotFoundError("Project not found or already deleted");
 		}
 
-		user.projects = user.projects.filter((pId) => pId.toString() !== projectId);
+		user.projects = user.projects.filter(
+			(pId) => pId.toString() !== project._id
+		);
 
 		await user.save();
 

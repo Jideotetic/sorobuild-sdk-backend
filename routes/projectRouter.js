@@ -37,7 +37,7 @@
 
 /**
  * @swagger
- * /project/{accountId}:
+ * /project:
  *   post:
  *     summary: Create a new project
  *     tags: [Project]
@@ -50,12 +50,6 @@
  *           type: string
  *         required: true
  *         description: ID token
- *       - in: path
- *         name: accountId
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique ID (_id) of the account to which the project belongs
  *     requestBody:
  *       required: true
  *       content:
@@ -100,64 +94,9 @@
  *         description: Internal server error
  */
 
-// /**
-//  * @swagger
-//  * /project:
-//  *   get:
-//  *     summary: Get all projects
-//  *     tags: [Project]
-//  *     security:
-//  *        - Authorization: []
-//  *     parameters:
-//  *       - in: header
-//  *         name: idToken
-//  *         schema:
-//  *           type: string
-//  *         required: true
-//  *         description: ID token
-//  *       - in: query
-//  *         name: start
-//  *         required: false
-//  *         schema:
-//  *           type: integer
-//  *           default: 0
-//  *         description: Pagination offset
-//  *       - in: query
-//  *         name: limit
-//  *         required: false
-//  *         schema:
-//  *           type: integer
-//  *           default: 10
-//  *         description: Number of projects to return
-//  *     responses:
-//  *       200:
-//  *         description: Projects fetched successfully
-//  *         content:
-//  *           application/json:
-//  *             schema:
-//  *               type: object
-//  *               properties:
-//  *                 statusCode:
-//  *                   type: integer
-//  *                   example: 200
-//  *                 message:
-//  *                   type: string
-//  *                   example: Project fetched successfully
-//  *                 projects:
-//  *                   type: array
-//  *                   items:
-//  *                     $ref: '#/components/schemas/Project'
-//  *       401:
-//  *         description: Unauthorized request
-//  *       400:
-//  *         description: Bad request
-//  *       500:
-//  *         description: Internal server error
-//  */
-
 /**
  * @swagger
- * /project/{accountId}:
+ * /project:
  *   get:
  *     summary: Get all projects link to an account
  *     tags: [Project]
@@ -170,12 +109,6 @@
  *           type: string
  *         required: true
  *         description: ID token
- *       - in: path
- *         name: accountId
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique ID (_id) of the account to which the project belongs
  *     responses:
  *       200:
  *         description: Project fetched successfully
@@ -204,7 +137,7 @@
 
 /**
  * @swagger
- * /project/{accountId}/{projectId}:
+ * /project/{projectId}:
  *   put:
  *     summary: Update a project
  *     tags: [Project]
@@ -217,12 +150,6 @@
  *           type: string
  *         required: true
  *         description: ID token
- *       - in: path
- *         name: accountId
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique ID (_id) of the account to which the project belongs
  *       - in: path
  *         name: projectId
  *         required: true
@@ -275,7 +202,7 @@
 
 /**
  * @swagger
- * /project/{accountId}/{projectId}:
+ * /project/{projectId}:
  *   delete:
  *     summary: Delete a project
  *     tags: [Project]
@@ -288,12 +215,6 @@
  *           type: string
  *         required: true
  *         description: ID token
- *       - in: path
- *         name: accountId
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique ID (_id) of the account to which the project belongs
  *       - in: path
  *         name: projectId
  *         required: true
@@ -336,20 +257,12 @@ import {
 
 const projectRouter = Router();
 
-projectRouter.post(
-	"/:accountId",
-	createProjectPayloadValidation,
-	createProject
-);
+projectRouter.post("/", createProjectPayloadValidation, createProject);
 
-projectRouter.get("/:accountId", fetchAllUserProjects);
+projectRouter.get("/", fetchAllUserProjects);
 
-projectRouter.put(
-	"/:accountId/:projectId",
-	updateProjectPayloadValidation,
-	updateProject
-);
+projectRouter.put("/:projectId", updateProjectPayloadValidation, updateProject);
 
-projectRouter.delete("/:accountId/:projectId", deleteProject);
+projectRouter.delete("/:projectId", deleteProject);
 
 export default projectRouter;
