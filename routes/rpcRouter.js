@@ -72,6 +72,7 @@ import { callRPCNetwork } from "../controllers/rpcController.js";
 import CustomBadRequestError from "../errors/customBadRequestError.js";
 import axios from "axios";
 import { dynamicCORS } from "../middlewares/dynamicCors.js";
+import { rateLimitByProjectId } from "../middlewares/rateLimit.js";
 
 const rpcRouter = Router();
 
@@ -111,6 +112,6 @@ rpcRouter.post("/:network/open", async (req, res) => {
 	}
 });
 
-rpcRouter.post("/:network", dynamicCORS, callRPCNetwork);
+rpcRouter.post("/:network", rateLimitByProjectId, dynamicCORS, callRPCNetwork);
 
 export default rpcRouter;

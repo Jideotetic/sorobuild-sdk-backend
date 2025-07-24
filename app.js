@@ -21,6 +21,7 @@ import {
 } from "./middlewares/guards.js";
 
 import "./middlewares/passport.js";
+import { generalRateLimiter } from "./middlewares/rateLimit.js";
 
 const app = express();
 
@@ -60,10 +61,17 @@ const port = process.env.PORT || 3000;
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 // API endpoints
-app.use("/auth", authRouter);
-app.use("/project", verifyAuthorizationToken, verifyIdToken, projectRouter);
+app.use("/auth", generalRateLimiter, authRouter);
+app.use(
+	"/project",
+	generalRateLimiter,
+	verifyAuthorizationToken,
+	verifyIdToken,
+	projectRouter
+);
 app.use(
 	"/rpc-credits",
+	generalRateLimiter,
 	verifyAuthorizationToken,
 	verifyIdToken,
 	rpcCreditsRouter

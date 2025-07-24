@@ -96,6 +96,7 @@ import { callHorizonNetwork } from "../controllers/horizonController.js";
 import CustomBadRequestError from "../errors/customBadRequestError.js";
 import axios from "axios";
 import { dynamicCORS } from "../middlewares/dynamicCors.js";
+import { rateLimitByProjectId } from "../middlewares/rateLimit.js";
 
 const horizonRouter = Router();
 
@@ -157,6 +158,7 @@ horizonRouter.get(
 
 horizonRouter.get(
 	"/:network{/:primaryResource}{/:secondaryResource}{/:tertiaryResource}",
+	rateLimitByProjectId,
 	dynamicCORS,
 	callHorizonNetwork
 );

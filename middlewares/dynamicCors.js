@@ -5,20 +5,8 @@ import { decryptProjectId, findUserByProjectId } from "../utils/lib.js";
 export async function dynamicCORS(req, res, next) {
 	try {
 		const origin = req.headers.origin;
-		const { projectId } = req.query;
-
-		if (!projectId) {
-			throw new CustomBadRequestError("Project ID missing");
-		}
-
-		const decrypted = decryptProjectId(projectId);
-		const [accountId, randomizedId, projectIdToken] = decrypted.split("_");
-
-		const { user, project } = await findUserByProjectId(
-			accountId,
-			projectIdToken,
-			randomizedId
-		);
+		const user = req.user;
+		const project = req.project;
 
 		// Check for project key if call is from a sever side application
 		if (!origin) {

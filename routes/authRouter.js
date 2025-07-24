@@ -330,7 +330,7 @@ import {
 	verifyAuthorizationToken,
 	verifyIdToken,
 } from "../middlewares/guards.js";
-import { authRateLimiter } from "../middlewares/rateLimit.js";
+import { generalRateLimiter } from "../middlewares/rateLimit.js";
 import {
 	handleGoogleAuthCallback,
 	passportAuthHandler,
@@ -341,7 +341,6 @@ const authRouter = Router();
 
 authRouter.post(
 	"/generate",
-	authRateLimiter,
 	generateTokenPayloadValidation,
 	generateAuthorizationToken
 );
