@@ -4,9 +4,11 @@ import CustomBadRequestError from "../errors/customBadRequestError.js";
 import jwt from "jsonwebtoken";
 import { sendOnboardingEmail } from "../services/emailService.js";
 import { verifyRequestBody } from "../middlewares/guards.js";
-import { generateVerificationToken } from "../utils/lib.js";
+import { encryptProjectId, generateVerificationToken } from "../utils/lib.js";
 import { blacklistToken } from "../middlewares/blackListToken.js";
 import CustomForbiddenError from "../errors/customForbiddenError.js";
+import { v4 as uuidv4 } from "uuid";
+import { Buffer } from "buffer";
 
 export const generateAuthorizationToken = async (req, res, next) => {
 	try {
@@ -46,11 +48,21 @@ export async function validateEmail(req, res, next) {
 		const existingUser = await User.findOne({ email });
 
 		if (existingUser && existingUser.authProviders.includes("google")) {
-			throw new CustomForbiddenError("Account already linked via google");
+			throw new CustomForbiddenError(
+				"Account already linked via google...kindly sign in with google"
+			);
 		}
 
 		if (existingUser && existingUser.authProviders.includes("walletId")) {
-			throw new CustomForbiddenError("Account already linked via wallet");
+			throw new CustomForbiddenError(
+				"Account already linked via wallet...kindly sign in with wallet"
+			);
+		}
+
+		if (existingUser && existingUser.authProviders.includes("github")) {
+			throw new CustomForbiddenError(
+				"Account already linked via github...kindly sign in with github"
+			);
 		}
 
 		if (existingUser && existingUser.isVerified) {
@@ -109,7 +121,7 @@ export async function verifyUser(req, res, next) {
 		const user = await User.findOne({ verificationToken });
 
 		if (!user) {
-			throw new CustomBadRequestError("Invalid or expired verification token.");
+			throw new CustomForbiddenError("Invalid or expired verification token.");
 		}
 
 		user.isVerified = true;
@@ -118,10 +130,19 @@ export async function verifyUser(req, res, next) {
 
 		await user.save();
 
+		const randomId = uuidv4();
+
 		const newProject = new Project({
 			owner: user._id,
+			randomId,
 		});
 
+		await newProject.save();
+
+		const rawProjectId = `${user._id}_${randomId}_${newProject._id}`;
+		const encryptedProjectId = encryptProjectId(rawProjectId);
+
+		newProject.projectId = encryptedProjectId;
 		await newProject.save();
 
 		user.projects.push(newProject._id);

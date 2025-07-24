@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { v4 as uuidv4 } from "uuid";
 
 const projectSchema = new mongoose.Schema({
 	name: {
@@ -13,6 +12,14 @@ const projectSchema = new mongoose.Schema({
 	devMode: {
 		type: Boolean,
 		default: true,
+	},
+	projectId: {
+		type: String,
+		default: null,
+	},
+	randomId: {
+		type: String,
+		default: null,
 	},
 	apiSecret: {
 		type: String,

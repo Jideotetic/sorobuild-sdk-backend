@@ -47,12 +47,6 @@
  *           type: string
  *         description: The network to call testnet or public
  *       - in: query
- *         name: accountId
- *         required: true
- *         schema:
- *           type: string
- *         description: Account ID
- *       - in: query
  *         name: projectId
  *         required: true
  *         schema:

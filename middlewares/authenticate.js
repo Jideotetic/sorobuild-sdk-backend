@@ -34,13 +34,26 @@ export async function handleAuthCallback(
 			expiresIn: "24h",
 		});
 
-		const userObj = user.toObject();
-		delete userObj.password;
+		// Filter out user to send to frontend
+		const {
+			password,
+			_id,
+			createdAt,
+			__v,
+			verificationToken,
+			isVerified,
+			googleId,
+			walletId,
+			githubId,
+			discordId,
+			authProviders,
+			...safeUser
+		} = user.toObject();
 
 		return res.status(statusCode).json({
 			statusCode,
 			message: info?.message || "Success",
-			user: { ...userObj, token },
+			user: { ...safeUser, token },
 		});
 	} catch (error) {
 		return next(error);
@@ -86,15 +99,27 @@ export async function handleGoogleAuthCallback(
 			expiresIn: "24h",
 		});
 
-		let userObj = user.toObject();
-		delete userObj.password;
+		// Filter out user to send to frontend
+		const {
+			password,
+			_id,
+			createdAt,
+			__v,
+			verificationToken,
+			isVerified,
+			googleId,
+			walletId,
+			githubId,
+			discordId,
+			authProviders,
+			...safeUser
+		} = user.toObject();
 
-		userObj = { ...userObj, token };
+		const userObj = { ...safeUser, token };
 
 		const userJson = JSON.stringify(userObj);
 		const userBase64 = Buffer.from(userJson).toString("base64");
 
-		console.log({ token, userBase64 });
 		const redirectUrl = buildRedirectUrl({
 			baseUrl: redirectBaseUrl,
 			userBase64,

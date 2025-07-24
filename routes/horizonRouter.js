@@ -77,12 +77,6 @@
  *           type: string
  *         description:
  *       - in: query
- *         name: accountId
- *         required: true
- *         schema:
- *           type: string
- *         description: Account ID
- *       - in: query
  *         name: projectId
  *         required: true
  *         schema:
