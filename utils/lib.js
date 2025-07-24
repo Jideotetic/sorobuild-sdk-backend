@@ -28,27 +28,17 @@ export const generateVerificationToken = (email) => {
 	return verificationToken;
 };
 
-export async function findUser(_id) {
-	if (!_id) {
-		throw new CustomBadRequestError("Account ID missing");
-	}
-
-	if (!mongoose.Types.ObjectId.isValid(_id)) {
-		throw new CustomBadRequestError("Invalid accountId");
-	}
-
-	const user = await User.findOne({ _id });
+export async function findUser(id) {
+	const user = await User.findOne({ _id: id });
 
 	if (!user) {
-		throw new CustomNotFoundError(
-			"User not found with the provided account ID"
-		);
+		throw new CustomForbiddenError("Invalid token");
 	}
 
 	return user;
 }
 
-export async function findUserByProjectId(accountId, projectId, randomId) {
+export async function findUserByProjectId(accountId, projectId, randomizedId) {
 	const user = await User.findOne({ _id: accountId }).populate("projects");
 
 	if (!user) {
@@ -67,23 +57,15 @@ export async function findUserByProjectId(accountId, projectId, randomId) {
 		);
 	}
 
-	if (project.randomId !== randomId) {
+	if (project.randomId !== randomizedId) {
 		throw new CustomForbiddenError("Project ID is no longer valid");
 	}
 
 	return { user, project };
 }
 
-export async function findUserProjects(_id) {
-	if (!_id) {
-		throw new CustomBadRequestError("Account ID missing");
-	}
-
-	if (!mongoose.Types.ObjectId.isValid(_id)) {
-		throw new CustomBadRequestError("Invalid accountId");
-	}
-
-	const user = await User.findOne({ _id }).populate("projects");
+export async function findUserProjects(id) {
+	const user = await User.findOne({ _id: id }).populate("projects");
 
 	if (!user) {
 		throw new CustomNotFoundError(
@@ -106,13 +88,13 @@ export function buildRedirectUrl({ baseUrl, error, userBase64 }) {
 	return url.toString();
 }
 
-export async function decodeProjectId(projectIdToken) {
+export async function getAccountIdFromIdToken(token) {
 	try {
-		const decoded = jwt.verify(projectIdToken, process.env.JWT_SECRET);
-		const { accountId, randomId, projectId } = decoded;
-		return { accountId, randomId, projectId };
+		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+		const { id } = decoded;
+		return id;
 	} catch (err) {
-		throw new CustomUnauthorizedError("Invalid project ID.");
+		throw new CustomUnauthorizedError("Invalid token or expired token.");
 	}
 }
 
@@ -133,4 +115,11 @@ export function decryptProjectId(encryptedPayload) {
 	let decrypted = decipher.update(encryptedPayload, "base64", "utf8");
 	decrypted += decipher.final("utf8");
 	return decrypted;
+}
+
+export function formatProjectForResponse(projectDoc) {
+	const { _id, __v, owner, randomId, apiSecret, createdAt, ...safeProject } =
+		projectDoc.toObject();
+
+	return safeProject;
 }

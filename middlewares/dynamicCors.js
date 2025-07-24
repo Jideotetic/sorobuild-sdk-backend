@@ -12,12 +12,12 @@ export async function dynamicCORS(req, res, next) {
 		}
 
 		const decrypted = decryptProjectId(projectId);
-		const [accountId, randomId, projectIdToken] = decrypted.split("_");
+		const [accountId, randomizedId, projectIdToken] = decrypted.split("_");
 
 		const { user, project } = await findUserByProjectId(
 			accountId,
 			projectIdToken,
-			randomId
+			randomizedId
 		);
 
 		// Check for project key if call is from a sever side application
