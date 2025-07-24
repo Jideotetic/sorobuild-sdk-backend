@@ -34,6 +34,11 @@ const userSchema = new mongoose.Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		default: null,
 	},
+	plan: {
+		type: String,
+		enum: ["free", "pro"],
+		default: "free",
+	},
 	authProviders: {
 		type: [String],
 		enum: ["email", "google", "github", "discord", "wallet"],
