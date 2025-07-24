@@ -7,7 +7,7 @@
 
 /**
  * @swagger
- * /rpc-credits/{accountId}:
+ * /rpc-credits:
  *   get:
  *     summary: Get current rpc credits for an account
  *     tags: [RPC Credits]
@@ -20,12 +20,6 @@
  *           type: string
  *         required: true
  *         description: ID token
- *       - in: path
- *         name: accountId
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique ID (_id) of the account to which the project belongs
  *     responses:
  *       200:
  *         description: RPC credits fetched successfully
@@ -53,7 +47,7 @@
 
 /**
  * @swagger
- * /rpc-credits/{accountId}:
+ * /rpc-credits:
  *   put:
  *     summary: Buy rpc credits! COMING SOON
  *     tags: [RPC Credits]
@@ -66,12 +60,6 @@
  *           type: string
  *         required: true
  *         description: ID token
- *       - in: path
- *         name: accountId
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique ID (_id) of the account to which the project belongs
  *     requestBody:
  *       required: true
  *       content:
@@ -111,8 +99,8 @@ import { rpcCreditsPayloadValidation } from "../middlewares/validations.js";
 
 const rpcCreditsRouter = Router();
 
-rpcCreditsRouter.get("/:accountId", getAccountRpcCredits);
+rpcCreditsRouter.get("/", getAccountRpcCredits);
 
-rpcCreditsRouter.put("/:accountId", rpcCreditsPayloadValidation, buyRpcCredits);
+rpcCreditsRouter.put("/", rpcCreditsPayloadValidation, buyRpcCredits);
 
 export default rpcCreditsRouter;
