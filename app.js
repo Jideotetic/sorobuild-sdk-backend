@@ -69,6 +69,7 @@ app.use(
 	verifyIdToken,
 	projectRouter
 );
+
 app.use(
 	"/rpc-credits",
 	generalRateLimiter,
