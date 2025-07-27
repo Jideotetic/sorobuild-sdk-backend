@@ -18,6 +18,19 @@ export async function dynamicCORS(req, res, next) {
 			return next();
 		}
 
+		if (project.devMode && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+			res.setHeader("Access-Control-Allow-Origin", origin);
+			res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+			res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+
+			if (req.method === "OPTIONS") {
+				return res.sendStatus(200);
+			}
+
+			req.user = user;
+			return next();
+		}
+
 		// Check for whitelistedDomain if it is client and allow cors
 		if (project.whitelistedDomain && project.whitelistedDomain === origin) {
 			res.setHeader("Access-Control-Allow-Origin", origin);
