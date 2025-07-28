@@ -28,25 +28,18 @@ export async function rateLimitByProjectId(req, res, next) {
 	try {
 		const { projectId } = req.query;
 
-		console.log(projectId);
-
 		if (!projectId) {
 			throw new CustomBadRequestError("Project ID missing");
 		}
 
 		const decrypted = decryptProjectId(projectId);
-		console.log({ decrypted });
 		const [accountId, randomizedId, projectIdToken] = decrypted.split("_");
-
-		console.log({ accountId, randomizedId, projectIdToken });
 
 		const { user, project } = await findUserByProjectId(
 			accountId,
 			projectIdToken,
 			randomizedId
 		);
-
-		console.log({ user, project });
 
 		// Determine user's plan (fallback to 'default' if not set)
 		const userPlan = user.plan;

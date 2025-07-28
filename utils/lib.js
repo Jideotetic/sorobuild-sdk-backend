@@ -50,8 +50,6 @@ export async function findUserByProjectId(accountId, projectId, randomizedId) {
 		(p) => p._id.toString() === projectId.toString()
 	);
 
-	console.log(project.randomId, randomizedId);
-
 	if (!project) {
 		throw new CustomForbiddenError(
 			"This project does not belong to this account"
