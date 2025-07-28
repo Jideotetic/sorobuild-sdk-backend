@@ -107,7 +107,7 @@ const ENDPOINTS = {
 
 horizonRouter.get(
 	"/:network/open{/:primaryResource}{/:secondaryResource}{/:tertiaryResource}",
-	async (req, res) => {
+	async (req, res, next) => {
 		const { network, primaryResource, secondaryResource, tertiaryResource } =
 			req.params;
 
@@ -145,7 +145,8 @@ horizonRouter.get(
 
 			res.status(status).json(data);
 		} catch (error) {
-			return next(error);
+			console.log(error.response.data || error.message);
+			res.status(error.response?.status).json(error.response.data);
 		}
 	}
 );

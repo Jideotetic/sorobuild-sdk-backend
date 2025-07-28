@@ -49,6 +49,7 @@ export async function callHorizonNetwork(req, res) {
 
 		res.status(status).json(data);
 	} catch (error) {
-		return next(error);
+		console.log(error.response.data || error.message);
+		res.status(error.response?.status).json(error.response.data);
 	}
 }
