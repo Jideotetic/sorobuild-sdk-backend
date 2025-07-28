@@ -46,6 +46,10 @@ export async function findUserByProjectId(accountId, projectId, randomizedId) {
 		);
 	}
 
+	if (user.rpcCredits < 2) {
+		throw new CustomForbiddenError("Not enough RPC credits");
+	}
+
 	const project = user.projects.find(
 		(p) => p._id.toString() === projectId.toString()
 	);

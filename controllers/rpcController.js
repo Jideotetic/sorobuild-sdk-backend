@@ -18,9 +18,7 @@ export async function callRPCNetwork(req, res, next) {
 		);
 	}
 
-	if (user.rpcCredits < 2) {
-		throw new CustomForbiddenError("Not enough RPC credits");
-	}
+
 
 	const baseUrl = ENDPOINTS[network];
 

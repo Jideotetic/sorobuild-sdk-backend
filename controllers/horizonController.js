@@ -37,10 +37,6 @@ export async function callHorizonNetwork(req, res) {
 		targetUrl += `/${tertiaryResource}`;
 	}
 
-	if (user.rpcCredits < 2) {
-		throw new CustomForbiddenError("Not enough RPC credits");
-	}
-
 	try {
 		const { data, status } = await axios.get(targetUrl, {
 			headers: {
