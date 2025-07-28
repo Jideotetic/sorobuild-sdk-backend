@@ -133,7 +133,7 @@ export async function verifyUser(req, res, next) {
 
 		const newProject = new Project({
 			owner: user._id,
-			randomizedId,
+			randomId: randomizedId,
 		});
 
 		await newProject.save();
