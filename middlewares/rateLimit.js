@@ -33,8 +33,7 @@ export async function rateLimitByProjectId(req, res, next) {
 			throw new CustomBadRequestError("Project ID missing");
 		}
 
-		const decrypted = decryptProjectId(projectId);
-		const [accountId, randomizedId, projectIdToken] = decrypted.split("_");
+		const [accountId, randomizedId, projectIdToken] = projectId.split("_");
 
 		const { user, project } = await findUserByProjectId(
 			accountId,

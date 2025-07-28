@@ -128,7 +128,7 @@ export async function verifyUser(req, res, next) {
 
 		await user.save();
 
-		const randomizedId = uuidv4();
+		const randomizedId = Math.floor(1000 + Math.random() * 9000);
 
 		const newProject = new Project({
 			owner: user._id,
@@ -138,9 +138,8 @@ export async function verifyUser(req, res, next) {
 		await newProject.save();
 
 		const rawProjectId = `${user._id}_${randomizedId}_${newProject._id}`;
-		const encryptedProjectId = encryptProjectId(rawProjectId);
 
-		newProject.projectId = encryptedProjectId;
+		newProject.projectId = rawProjectId;
 		await newProject.save();
 
 		user.projects.push(newProject._id);

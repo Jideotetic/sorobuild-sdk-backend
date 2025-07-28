@@ -25,7 +25,7 @@ export async function createProject(req, res, next) {
 			throw new CustomForbiddenError("Project limit reached for this account");
 		}
 
-		const randomizedId = uuidv4();
+		const randomizedId = Math.floor(1000 + Math.random() * 9000);
 
 		const newProject = new Project({
 			owner: user._id,
@@ -37,9 +37,8 @@ export async function createProject(req, res, next) {
 		await newProject.save();
 
 		const rawProjectId = `${user._id}_${randomizedId}_${newProject._id}`;
-		const encryptedProjectId = encryptProjectId(rawProjectId);
 
-		newProject.projectId = encryptedProjectId;
+		newProject.projectId = rawProjectId;
 		await newProject.save();
 
 		user.projects.push(newProject._id);
@@ -81,10 +80,10 @@ export async function updateProject(req, res, next) {
 		verifyRequestBody(req);
 
 		const { name, devMode, whitelistedDomain } = req.body;
+
 		const { projectId } = req.params;
 
-		const decrypted = decryptProjectId(projectId);
-		const [accountId, randomizedId, projectIdToken] = decrypted.split("_");
+		const [accountId, randomizedId, projectIdToken] = projectId.split("_");
 
 		const { user, project } = await findUserByProjectId(
 			accountId,
@@ -120,8 +119,7 @@ export async function deleteProject(req, res, next) {
 	try {
 		const { projectId } = req.params;
 
-		const decrypted = decryptProjectId(projectId);
-		const [accountId, randomizedId, projectIdToken] = decrypted.split("_");
+		const [accountId, randomizedId, projectIdToken] = projectId.split("_");
 
 		const { user, project } = await findUserByProjectId(
 			accountId,
