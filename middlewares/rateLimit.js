@@ -35,6 +35,7 @@ export async function rateLimitByProjectId(req, res, next) {
 		}
 
 		const decrypted = decryptProjectId(projectId);
+		console.log({ decrypted });
 		const [accountId, randomizedId, projectIdToken] = decrypted.split("_");
 
 		console.log({ accountId, randomizedId, projectIdToken });
