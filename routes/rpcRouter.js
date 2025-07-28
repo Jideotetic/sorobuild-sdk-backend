@@ -100,10 +100,7 @@ rpcRouter.post("/:network/open", async (req, res) => {
 			},
 		});
 
-		res.status(status).json({
-			statusCode: status,
-			data,
-		});
+		res.status(status).json(data);
 	} catch (error) {
 		console.error(error.response?.data || error.message);
 		res.status(error.response?.status || 500).json({
