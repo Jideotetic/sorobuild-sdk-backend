@@ -2,8 +2,6 @@ import CustomBadRequestError from "../errors/customBadRequestError.js";
 import crypto from "crypto";
 import { User } from "../schemas/user.js";
 import CustomNotFoundError from "../errors/customNotFoundError.js";
-import jwt from "jsonwebtoken";
-import CustomUnauthorizedError from "../errors/customUnauthorizedError.js";
 import CustomForbiddenError from "../errors/customForbiddenError.js";
 
 export const extractIdToken = (req) => {
@@ -89,16 +87,6 @@ export function buildRedirectUrl({ baseUrl, error, userBase64 }) {
 	}
 
 	return url.toString();
-}
-
-export async function getAccountIdFromIdToken(token) {
-	try {
-		const decoded = jwt.verify(token, process.env.JWT_SECRET);
-		const { id } = decoded;
-		return id;
-	} catch (error) {
-		throw new CustomUnauthorizedError("Invalid token or expired token.");
-	}
 }
 
 const algorithm = process.env.PROJECT_ID_ENCRYPTION_ALGORITHM;

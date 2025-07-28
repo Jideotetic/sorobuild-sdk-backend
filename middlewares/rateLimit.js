@@ -27,6 +27,8 @@ export async function rateLimitByProjectId(req, res, next) {
 	try {
 		const { projectId } = req.query;
 
+		console.log({ projectId });
+
 		if (!projectId) {
 			throw new CustomBadRequestError("Project ID missing");
 		}
