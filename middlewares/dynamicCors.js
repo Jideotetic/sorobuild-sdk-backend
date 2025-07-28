@@ -7,6 +7,8 @@ export async function dynamicCORS(req, res, next) {
 		const user = req.user;
 		const project = req.project;
 
+		console.log({ origin });
+
 		// Check for project key if call is from a sever side application
 		if (!origin) {
 			const apiSecret = req.headers["x-api-secret"];
@@ -28,7 +30,7 @@ export async function dynamicCORS(req, res, next) {
 			if (req.method === "OPTIONS") {
 				return res.sendStatus(200);
 			}
-			console.log({ origin });
+
 			req.user = user;
 			return next();
 		}
@@ -51,6 +53,6 @@ export async function dynamicCORS(req, res, next) {
 			);
 		}
 	} catch (error) {
-		next(error);
+		return next(error);
 	}
 }
