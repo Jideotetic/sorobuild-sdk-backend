@@ -92,7 +92,7 @@ export async function getAccountIdFromIdToken(token) {
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
 		const { id } = decoded;
 		return id;
-	} catch (err) {
+	} catch (error) {
 		throw new CustomUnauthorizedError("Invalid token or expired token.");
 	}
 }

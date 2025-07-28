@@ -34,7 +34,7 @@ export const generateAuthorizationToken = async (req, res, next) => {
 			token,
 		});
 	} catch (error) {
-		next(error);
+		return next(error);
 	}
 };
 
@@ -101,7 +101,6 @@ export async function validateEmail(req, res, next) {
 			nextAction: "COMPLETE_EMAIL_VERIFICATION",
 		});
 	} catch (error) {
-		console.error(error);
 		return next(error);
 	}
 }
@@ -151,9 +150,8 @@ export async function verifyUser(req, res, next) {
 		req.body.email = user.email;
 
 		next();
-	} catch (err) {
-		console.error(err);
-		next(err);
+	} catch (error) {
+		next(error);
 	}
 }
 
@@ -173,7 +171,6 @@ export async function validateSignIn(req, res, next) {
 
 		next();
 	} catch (error) {
-		console.error(error);
 		return next(error);
 	}
 }
@@ -197,7 +194,6 @@ export async function signout(req, res, next) {
 			message: "User signed out successfully",
 		});
 	} catch (error) {
-		console.error(error);
 		return next(error);
 	}
 }

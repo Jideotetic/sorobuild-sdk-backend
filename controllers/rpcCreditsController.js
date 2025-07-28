@@ -13,8 +13,7 @@ export async function getAccountRpcCredits(req, res, next) {
 			rpcCredits: user.rpcCredits,
 		});
 	} catch (error) {
-		console.error(error);
-		next(error);
+		return next(error);
 	}
 }
 
@@ -31,7 +30,6 @@ export async function buyRpcCredits(req, res, next) {
 			message: "COMING SOON!",
 		});
 	} catch (error) {
-		console.error(error);
-		next(error);
+		return next(error);
 	}
 }

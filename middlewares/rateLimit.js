@@ -2,7 +2,6 @@ import rateLimit from "express-rate-limit";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 import CustomBadRequestError from "../errors/customBadRequestError.js";
 import { decryptProjectId, findUserByProjectId } from "../utils/lib.js";
-import CustomForbiddenError from "../errors/customForbiddenError.js";
 import CustomTooManyRequestError from "../errors/customTooManyRequestError.js";
 
 export const PLAN_RATE_LIMITS = {
@@ -78,7 +77,7 @@ export async function rateLimitByProjectId(req, res, next) {
 					new CustomTooManyRequestError("Rate limit exceeded. Try again later.")
 				);
 			});
-	} catch (err) {
-		next(err);
+	} catch (error) {
+		next(error);
 	}
 }

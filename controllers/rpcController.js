@@ -36,6 +36,6 @@ export async function callRPCNetwork(req, res, next) {
 
 		res.status(status).json(data);
 	} catch (error) {
-		next(error);
+		return next(error);
 	}
 }

@@ -53,7 +53,6 @@ export async function createProject(req, res, next) {
 			project: safeProject,
 		});
 	} catch (error) {
-		console.error(error);
 		return next(error);
 	}
 }
@@ -73,8 +72,7 @@ export async function fetchAllUserProjects(req, res, next) {
 			projects: cleanedProjects,
 		});
 	} catch (error) {
-		console.error(error);
-		next(error);
+		return next(error);
 	}
 }
 
@@ -114,7 +112,6 @@ export async function updateProject(req, res, next) {
 			project: safeProject,
 		});
 	} catch (error) {
-		console.error(error);
 		return next(error);
 	}
 }
@@ -152,7 +149,6 @@ export async function deleteProject(req, res, next) {
 			message: "Project deleted successfully",
 		});
 	} catch (error) {
-		console.error(error);
 		return next(error);
 	}
 }

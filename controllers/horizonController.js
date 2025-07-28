@@ -53,9 +53,6 @@ export async function callHorizonNetwork(req, res) {
 
 		res.status(status).json(data);
 	} catch (error) {
-		console.error(error.response?.data || error.message);
-		res.status(error.response?.status || 500).json({
-			error: error.response?.data || "Error forwarding request.",
-		});
+		return next(error);
 	}
 }

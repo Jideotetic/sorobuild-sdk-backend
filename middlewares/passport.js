@@ -55,7 +55,7 @@ passport.use(
 			try {
 				return done(null, token);
 			} catch (error) {
-				done(error);
+				return done(error);
 			}
 		}
 	)
@@ -145,9 +145,8 @@ passport.use(
 				return done(null, populatedUser, {
 					message: "Google signup successful",
 				});
-			} catch (err) {
-				console.error("Google Strategy Error:", err);
-				return done(err);
+			} catch (error) {
+				return done(error);
 			}
 		}
 	)
