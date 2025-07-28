@@ -86,6 +86,6 @@ export async function rateLimitByProjectId(req, res, next) {
 				);
 			});
 	} catch (err) {
-		next(new CustomForbiddenError(err.message));
+		next(err);
 	}
 }
