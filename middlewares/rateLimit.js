@@ -86,6 +86,6 @@ export async function rateLimitByProjectId(req, res, next) {
 				);
 			});
 	} catch (err) {
-		next(new CustomForbiddenError("Rate limiter failed"));
+		next(err);
 	}
 }

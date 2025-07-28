@@ -2,7 +2,6 @@ import CustomBadRequestError from "../errors/customBadRequestError.js";
 import crypto from "crypto";
 import { User } from "../schemas/user.js";
 import CustomNotFoundError from "../errors/customNotFoundError.js";
-import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import CustomUnauthorizedError from "../errors/customUnauthorizedError.js";
 import CustomForbiddenError from "../errors/customForbiddenError.js";
@@ -50,6 +49,8 @@ export async function findUserByProjectId(accountId, projectId, randomizedId) {
 	const project = user.projects.find(
 		(p) => p._id.toString() === projectId.toString()
 	);
+
+	console.log(project.randomId, randomizedId);
 
 	if (!project) {
 		throw new CustomForbiddenError(
