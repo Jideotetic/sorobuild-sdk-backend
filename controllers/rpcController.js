@@ -7,7 +7,7 @@ const ENDPOINTS = {
 	public: process.env.RPC_PUBLIC_URL,
 };
 
-export async function callRPCNetwork(req, res) {
+export async function callRPCNetwork(req, res, next) {
 	const { network } = req.params;
 	const body = req.body;
 	const user = req.user;
@@ -36,9 +36,6 @@ export async function callRPCNetwork(req, res) {
 
 		res.status(status).json(data);
 	} catch (error) {
-		console.error(error.response?.data || error.message);
-		res.status(error.response?.status || 500).json({
-			error: error.response?.data || "Error forwarding request.",
-		});
+		next(error);
 	}
 }

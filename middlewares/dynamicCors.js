@@ -1,6 +1,5 @@
 import CustomBadRequestError from "../errors/customBadRequestError.js";
 import CustomForbiddenError from "../errors/customForbiddenError.js";
-import { decryptProjectId, findUserByProjectId } from "../utils/lib.js";
 
 export async function dynamicCORS(req, res, next) {
 	try {
@@ -18,7 +17,10 @@ export async function dynamicCORS(req, res, next) {
 			return next();
 		}
 
-		if (project.devMode && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+		if (
+			project.devMode &&
+			/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+		) {
 			res.setHeader("Access-Control-Allow-Origin", origin);
 			res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 			res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
@@ -26,7 +28,7 @@ export async function dynamicCORS(req, res, next) {
 			if (req.method === "OPTIONS") {
 				return res.sendStatus(200);
 			}
-
+			console.log({ origin });
 			req.user = user;
 			return next();
 		}
