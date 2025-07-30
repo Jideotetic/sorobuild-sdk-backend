@@ -4,10 +4,9 @@ import CustomBadRequestError from "../errors/customBadRequestError.js";
 import jwt from "jsonwebtoken";
 import { sendOnboardingEmail } from "../services/emailService.js";
 import { verifyRequestBody } from "../middlewares/guards.js";
-import { encryptProjectId, generateVerificationToken } from "../utils/lib.js";
+import { generateVerificationToken } from "../utils/lib.js";
 import { blacklistToken } from "../middlewares/blackListToken.js";
 import CustomForbiddenError from "../errors/customForbiddenError.js";
-import { v4 as uuidv4 } from "uuid";
 
 export const generateAuthorizationToken = async (req, res, next) => {
 	try {
@@ -129,17 +128,21 @@ export async function verifyUser(req, res, next) {
 		await user.save();
 
 		const randomizedId = Math.floor(1000 + Math.random() * 9000);
+		const randomizedKey = Math.floor(1000 + Math.random() * 9000);
 
 		const newProject = new Project({
 			owner: user._id,
 			randomId: randomizedId,
+			randomKey: randomizedKey,
 		});
 
 		await newProject.save();
 
 		const rawProjectId = `${user._id}_${randomizedId}_${newProject._id}`;
+		const rawProjectKey = `${user._id}_${randomizedKey}_${newProject._id}`;
 
 		newProject.projectId = rawProjectId;
+		newProject.apiKey = rawProjectKey;
 		await newProject.save();
 
 		user.projects.push(newProject._id);

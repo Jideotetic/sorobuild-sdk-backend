@@ -2,14 +2,11 @@ import { Project } from "../schemas/project.js";
 import CustomNotFoundError from "../errors/customNotFoundError.js";
 import { verifyRequestBody } from "../middlewares/guards.js";
 import {
-	decryptProjectId,
-	encryptProjectId,
 	findUser,
 	findUserByProjectId,
 	findUserProjects,
 	formatProjectForResponse,
 } from "../utils/lib.js";
-import { v4 as uuidv4 } from "uuid";
 import CustomForbiddenError from "../errors/customForbiddenError.js";
 
 export async function createProject(req, res, next) {
@@ -26,19 +23,23 @@ export async function createProject(req, res, next) {
 		}
 
 		const randomizedId = Math.floor(1000 + Math.random() * 9000);
+		const randomizedKey = Math.floor(1000 + Math.random() * 9000);
 
 		const newProject = new Project({
 			owner: user._id,
 			name,
 			whitelistedDomain,
 			randomId: randomizedId,
+			randomKey: randomizedKey,
 		});
 
 		await newProject.save();
 
 		const rawProjectId = `${user._id}_${randomizedId}_${newProject._id}`;
+		const rawProjectKey = `${user._id}_${randomizedKey}_${newProject._id}`;
 
 		newProject.projectId = rawProjectId;
+		newProject.apiKey = rawProjectKey;
 		await newProject.save();
 
 		user.projects.push(newProject._id);

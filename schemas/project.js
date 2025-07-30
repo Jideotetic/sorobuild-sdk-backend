@@ -21,7 +21,11 @@ const projectSchema = new mongoose.Schema({
 		type: String,
 		default: null,
 	},
-	apiSecret: {
+	randomKey: {
+		type: String,
+		default: null,
+	},
+	apiKey: {
 		type: String,
 		default: null,
 	},
