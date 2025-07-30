@@ -47,11 +47,11 @@
  *           type: string
  *         description: The network to call testnet or public
  *       - in: query
- *         name: projectId
+ *         name: key
  *         required: true
  *         schema:
  *           type: string
- *         description: Project ID
+ *         description: Project ID / API Key
  *     requestBody:
  *       required: true
  *       content:

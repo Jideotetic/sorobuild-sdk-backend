@@ -1,7 +1,7 @@
 import rateLimit from "express-rate-limit";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 import CustomBadRequestError from "../errors/customBadRequestError.js";
-import { decryptProjectId, findUserByProjectId } from "../utils/lib.js";
+import { findUserByProjectId } from "../utils/lib.js";
 import CustomTooManyRequestError from "../errors/customTooManyRequestError.js";
 
 export const PLAN_RATE_LIMITS = {

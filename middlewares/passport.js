@@ -130,10 +130,22 @@ passport.use(
 
 				await newUser.save();
 
+				const randomizedId = Math.floor(1000 + Math.random() * 9000);
+				const randomizedKey = Math.floor(1000 + Math.random() * 9000);
+
 				const newProject = new Project({
 					owner: newUser._id,
-					whitelistedDomain: "",
+					randomId: randomizedId,
+					randomKey: randomizedKey,
 				});
+
+				await newProject.save();
+
+				const rawProjectId = `${newUser._id}_${randomizedId}_${newProject._id}`;
+				const rawProjectKey = `${newUser._id}_${randomizedKey}_${newProject._id}`;
+
+				newProject.projectId = rawProjectId;
+				newProject.apiKey = rawProjectKey;
 				await newProject.save();
 
 				newUser.projects.push(newProject._id);
