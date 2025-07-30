@@ -21,9 +21,9 @@ export async function buyRpcCredits(req, res, next) {
 	try {
 		verifyRequestBody(req);
 
-		const { accountId: _id } = req.params;
+		const incomingUser = req.user;
 
-		const user = await findUser(_id);
+		const user = await findUser(incomingUser.id);
 
 		res.status(200).json({
 			statusCode: 200,

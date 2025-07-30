@@ -1,4 +1,3 @@
-import CustomBadRequestError from "../errors/customBadRequestError.js";
 import CustomForbiddenError from "../errors/customForbiddenError.js";
 
 export async function dynamicCORS(req, res, next) {
@@ -7,14 +6,8 @@ export async function dynamicCORS(req, res, next) {
 		const user = req.user;
 		const project = req.project;
 
-		console.log({ origin });
-
 		// Check for project key if call is from a sever side application
 		if (!origin) {
-			const apiSecret = req.headers["x-api-secret"];
-			if (!apiSecret) {
-				throw new CustomBadRequestError("API secret is missing");
-			}
 			req.user = user;
 			return next();
 		}
