@@ -65,6 +65,36 @@ export async function findUserByProjectId(accountId, projectId, randomizedId) {
 	return { user, project };
 }
 
+export async function findUserByApiKey(accountId, projectId, randomizedKey) {
+	const user = await User.findOne({ _id: accountId }).populate("projects");
+
+	if (!user) {
+		throw new CustomNotFoundError(
+			"User not found with the provided project ID"
+		);
+	}
+
+	if (user.rpcCredits < 2) {
+		throw new CustomForbiddenError("Not enough RPC credits");
+	}
+
+	const project = user.projects.find(
+		(p) => p._id.toString() === projectId.toString()
+	);
+
+	if (!project) {
+		throw new CustomForbiddenError(
+			"This project does not belong to this account"
+		);
+	}
+
+	if (project.randomKey !== randomizedKey) {
+		throw new CustomForbiddenError("API Key is no longer valid");
+	}
+
+	return { user, project };
+}
+
 export async function findUserProjects(id) {
 	const user = await User.findOne({ _id: id }).populate("projects");
 
@@ -109,8 +139,16 @@ export function decryptProjectId(encryptedPayload) {
 }
 
 export function formatProjectForResponse(projectDoc) {
-	const { _id, __v, owner, randomId, apiSecret, createdAt, ...safeProject } =
-		projectDoc.toObject();
+	const {
+		_id,
+		__v,
+		owner,
+		randomId,
+		apiSecret,
+		createdAt,
+		randomKey,
+		...safeProject
+	} = projectDoc.toObject();
 
 	return safeProject;
 }

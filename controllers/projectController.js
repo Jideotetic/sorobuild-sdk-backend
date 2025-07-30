@@ -59,7 +59,6 @@ export async function createProject(req, res, next) {
 
 export async function fetchAllUserProjects(req, res, next) {
 	try {
-		const { accountId: _id } = req.params;
 		const incomingUser = req.user;
 
 		const user = await findUserProjects(incomingUser.id);
